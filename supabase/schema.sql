@@ -20,8 +20,8 @@ create table if not exists public.products (
   category       text not null check (category in ('Wedding gowns','Lehengas','Reception','Pre-wedding events','Bridesmaids')),
   silhouette     text not null check (silhouette in ('ballgown','aline','mermaid','sheath','lehenga','jumpsuit','sari')),
   fabric         text,
-  colors         text[] not null default '{}',   -- keys: ivory, champagne, blush, red, marigold, emerald, sage, dusk, gold, black
-  trim_color     text not null default '#C6A15A', -- hex colour used for embroidery and borders in the illustration
+  colors         text[] not null default '{}',   -- keys: ivory, champagne, blush, red, maroon, coral, marigold, emerald, sage, dusk, mink, gold, black
+  trim_color     text not null default '#C6A15A', -- hex colour used for embroidery and borders in the fallback sketch
   price_usd      integer not null check (price_usd > 0),
   lead_weeks     integer not null check (lead_weeks between 1 and 52),
   rush_available boolean not null default false,
@@ -30,6 +30,11 @@ create table if not exists public.products (
   active         boolean not null default true,
   sort           integer not null default 0
 );
+
+-- Product photos: a path inside the site (images/x.jpg) or a full https URL,
+-- e.g. from a Supabase Storage public bucket. Leave empty to show the sketch.
+alter table public.products add column if not exists image_url text;
+alter table public.products add column if not exists image_alt text;
 
 -- ─── Customer requests (write-only from the website) ────────────────────────
 
@@ -114,36 +119,45 @@ revoke all on function public.taken_slots(date, text) from public;
 grant execute on function public.taken_slots(date, text) to anon, authenticated;
 
 -- ─── Starter catalogue (sample data — replace with real designers) ──────────
+-- Generated from the built-in catalogue in index.html.
 
 insert into public.designers (id, name, city, specialty, sort) values
-  ('ondine',  'Maison Ondine',       'Paris',     'Structured silk gowns and hand beading',     1),
-  ('lumbre',  'Casa Lumbre',         'Seville',   'Chantilly lace and Spanish capes',           2),
-  ('haldane', 'Haldane & Rowe',      'London',    'Minimal crepe tailoring for city weddings',  3),
-  ('sora',    'Sora Atelier',        'Kyoto',     'Sculptural silk gazar and slip dresses',     4),
-  ('rasika',  'Rasika Mehra Studio', 'New Delhi', 'Zardozi and gota patti lehengas',            5),
-  ('kesar',   'Kesar House',         'Varanasi',  'Handwoven Banarasi silk and velvet',         6),
-  ('juniper', 'Juniper Lane',        'Portland',  'Mix-and-match bridesmaid colour stories',    7)
+  ('ondine', 'Maison Ondine', 'Paris', 'Structured silk gowns and hand beading', 1),
+  ('lumbre', 'Casa Lumbre', 'Seville', 'Chantilly lace and Spanish capes', 2),
+  ('haldane', 'Haldane & Rowe', 'London', 'Minimal crepe tailoring for city weddings', 3),
+  ('sora', 'Sora Atelier', 'Kyoto', 'Sculptural silk gazar and slip dresses', 4),
+  ('rasika', 'Rasika Mehra Studio', 'New Delhi', 'Zardozi and gota patti lehengas', 5),
+  ('kesar', 'Kesar House', 'Varanasi', 'Velvet and heirloom zardozi bridal sets', 6)
 on conflict (id) do update set name = excluded.name, city = excluded.city, specialty = excluded.specialty, sort = excluded.sort;
 
-insert into public.products (id, name, designer_id, category, silhouette, fabric, colors, trim_color, price_usd, lead_weeks, rush_available, embellished, description, sort) values
-  ('celeste',    'Céleste',    'ondine',  'Wedding gowns',      'ballgown', 'Silk mikado, hand-set pearls',  array['ivory','champagne'],        '#C6A15A', 4850, 20, false, true,  'A full mikado skirt over a boned bodice, with pearls set by hand along the neckline and waist seam.', 1),
-  ('marguerite', 'Marguerite', 'lumbre',  'Wedding gowns',      'mermaid',  'Chantilly lace over silk crepe', array['ivory','blush'],            '#FFFFFF', 3600, 18, true,  true,  'Fitted through the knee and flaring into a scalloped lace hem. The lace is cut so the motifs meet at the seams.', 2),
-  ('wren',       'Wren',       'haldane', 'Wedding gowns',      'sheath',   'Double-faced crepe',            array['ivory','champagne'],        '#DCCFB8', 2200, 12, true,  false, 'A clean column with a low back. No boning and no beading, so it is light enough for a long day.', 3),
-  ('aiko',       'Aiko',       'sora',    'Wedding gowns',      'aline',    'Silk gazar',                    array['ivory'],                    '#E9E2D6', 3100, 16, false, false, 'Folded gazar that holds its shape without a petticoat. Pockets sit in the side seams.', 4),
-  ('odette',     'Odette',     'ondine',  'Wedding gowns',      'aline',    'Tulle with 3D silk florals',    array['ivory','blush'],            '#E3A9AE', 3950, 22, false, true,  'Layered tulle scattered with silk petals that thin out toward the hem.', 5),
-  ('noor',       'Noor',       'rasika',  'Lehengas',           'lehenga',  'Raw silk with zardozi',         array['red','blush'],              '#C6A15A', 6400, 24, false, true,  'A twelve-kali skirt with a zardozi border, a matching blouse and a net dupatta finished in gota.', 6),
-  ('rani',       'Rani',       'kesar',   'Lehengas',           'lehenga',  'Silk velvet with dabka',        array['emerald','red'],            '#C6A15A', 4200, 20, false, true,  'Velvet for a winter wedding, embroidered in dabka and finished with a Banarasi dupatta.', 7),
-  ('gulnaar',    'Gulnaar',    'rasika',  'Pre-wedding events', 'lehenga',  'Organza with gota patti',       array['marigold','blush'],         '#E8C26A', 2900, 14, true,  true,  'Light enough to dance in. Made for mehndi and sangeet, with a flared skirt and a short dupatta.', 8),
-  ('saffron',    'Saffron',    'kesar',   'Pre-wedding events', 'sari',     'Handwoven Banarasi silk',       array['marigold','red'],           '#C6A15A', 1200, 10, true,  true,  'Woven in Varanasi with a zari border. Comes with an unstitched blouse piece, which we can tailor to your measurements.', 9),
-  ('tamsin',     'Tamsin',     'haldane', 'Pre-wedding events', 'sheath',   'Wool-silk crepe',               array['dusk','ivory'],             '#B9C6D6',  680,  6, false, false, 'A midi sheath for the rehearsal dinner or the registry office.', 10),
-  ('pilar',      'Pilar',      'lumbre',  'Reception',          'jumpsuit', 'Silk crepe, lace cape',         array['ivory','black'],            '#F3ECDF', 1850, 10, true,  false, 'Wide-leg jumpsuit with a detachable floor-length lace cape for the entrance.', 11),
-  ('isadora',    'Isadora',    'ondine',  'Reception',          'sheath',   'Beaded tulle',                  array['champagne','gold'],         '#FFFFFF', 2750, 14, false, true,  'A column covered in glass bugle beads, cut to move under reception lights.', 12),
-  ('hana',       'Hana',       'sora',    'Reception',          'aline',    'Silk charmeuse',                array['champagne','ivory'],        '#E6D2B0', 1450,  8, true,  false, 'A bias-cut slip dress for the after-party. The cowl back is weighted so it stays in place.', 13),
-  ('fern',       'Fern',       'juniper', 'Bridesmaids',        'aline',    'Recycled chiffon',              array['sage','dusk','blush'],      '#FFFFFF',  240,  8, true,  false, 'A wrap-front chiffon A-line in 14 sizes. It mixes with Clover for a coordinated party.', 14),
-  ('clover',     'Clover',     'juniper', 'Bridesmaids',        'sheath',   'Stretch satin',                 array['sage','emerald','champagne'], '#FFFFFF', 210,  8, true,  false, 'Square neck and adjustable straps. The stretch makes it forgiving to buy online.', 15),
-  ('mira',       'Mira',       'juniper', 'Bridesmaids',        'lehenga',  'Georgette with mirror work',    array['blush','sage','marigold'],  '#E8E2D0',  480, 10, true,  true,  'A lightweight lehenga set for bridesmaids, with a crop blouse and a georgette dupatta.', 16)
+insert into public.products (id, name, designer_id, category, silhouette, fabric, colors, trim_color, price_usd, lead_weeks, rush_available, embellished, description, image_url, image_alt, active, sort) values
+  ('marguerite', 'Marguerite', 'lumbre', 'Wedding gowns', 'mermaid', 'Chantilly lace, lace capelet', array['ivory','blush'], '#FFFFFF', 3600, 18, true, true, 'Fitted through the knee and flaring into a scalloped hem, with a detachable high-neck lace capelet.', 'images/marguerite.jpg', 'Fitted lace mermaid gown with a high-neck lace capelet and flutter sleeves', true, 1),
+  ('aurelia', 'Aurelia', 'ondine', 'Wedding gowns', 'aline', 'Embroidered lace on tulle', array['ivory'], '#FFFFFF', 4200, 20, false, true, 'Lace sleeves and a high illusion collar over a plunging bodice, finished with a chapel train.', 'images/aurelia.jpg', 'Long-sleeve lace A-line gown with a high illusion collar and plunging bodice', true, 2),
+  ('celeste', 'Céleste', 'ondine', 'Wedding gowns', 'ballgown', 'Corded lace over tulle, boned corset', array['ivory'], '#FFFFFF', 4850, 20, false, true, 'A strapless corset with a scalloped lace edge over a full layered skirt. Pockets sit in the side seams.', 'images/celeste.jpg', 'Strapless lace ball gown with a corseted bodice and full skirt', true, 3),
+  ('solene', 'Solène', 'lumbre', 'Wedding gowns', 'ballgown', 'Floral lace on organza', array['ivory'], '#FFFFFF', 3900, 18, true, true, 'Thin straps, a sweetheart neckline and a basque waist over a full lace skirt.', 'images/solene.jpg', 'Lace ball gown with thin straps and a sweetheart neckline', true, 4),
+  ('odette', 'Odette', 'ondine', 'Wedding gowns', 'aline', 'Guipure lace', array['ivory'], '#FFFFFF', 5600, 24, false, true, 'Guipure lace from neck to hem, with long sleeves and a cathedral-length train.', 'images/odette.jpg', 'Long-sleeve guipure lace A-line gown with a cathedral train', true, 5),
+  ('valentina', 'Valentina', 'lumbre', 'Wedding gowns', 'ballgown', 'Lace appliqué on tulle, lace-edged veil', array['ivory'], '#FFFFFF', 5200, 20, false, true, 'A strapless lace ball gown with a front slit. The matching cathedral veil is edged in the same lace.', 'images/valentina.jpg', 'Strapless lace ball gown with a front slit, worn with a long lace-edged veil', true, 6),
+  ('isabela', 'Isabela', 'lumbre', 'Wedding gowns', 'mermaid', 'Crepe with lace appliqué', array['ivory'], '#FFFFFF', 4100, 18, false, true, 'A sheer lace bodice with one off-the-shoulder strap, over a crepe mermaid skirt and a wide lace train.', 'images/isabela.jpg', 'Off-the-shoulder crepe mermaid gown with a sheer lace bodice and lace train', true, 7),
+  ('elodie', 'Élodie', 'ondine', 'Wedding gowns', 'aline', 'Layered tulle with lace appliqué', array['ivory','blush'], '#FFFFFF', 3300, 16, true, true, 'Soft layered tulle with lace at the bodice, an open back and a long sweeping train.', 'images/elodie.jpg', 'Tulle A-line gown with an open back and long train, seen from behind', true, 8),
+  ('wren', 'Wren', 'haldane', 'Wedding gowns', 'mermaid', 'Double-faced crepe', array['ivory','champagne'], '#DCCFB8', 2200, 12, true, false, 'A draped crepe bodice and fitted mermaid skirt with a long train. No boning and no beading, so it is light enough for a long day.', 'images/wren.jpg', 'Strapless draped crepe mermaid gown with a long train', true, 9),
+  ('aiko', 'Aiko', 'sora', 'Wedding gowns', 'aline', 'Duchess satin', array['ivory'], '#E9E2D6', 2800, 14, true, false, 'A pleated sweetheart bodice and a full satin skirt with a front slit and pockets.', 'images/aiko.jpg', 'Strapless satin A-line gown with a pleated bodice and front slit', true, 10),
+  ('hana', 'Hana', 'sora', 'Wedding gowns', 'sheath', 'Silk satin', array['ivory','champagne'], '#E6D2B0', 2400, 12, true, false, 'A corseted satin bodice on thin straps, falling into a fluted skirt with a short train.', 'images/hana.jpg', 'Satin fit-and-flare gown with thin straps and a corseted bodice', true, 11),
+  ('noor', 'Noor', 'rasika', 'Lehengas', 'lehenga', 'Net with zardozi and sequins', array['red','maroon'], '#C6A15A', 6400, 24, false, true, 'Red net worked all over in zardozi and sequins, with a long-sleeve blouse and a matching dupatta.', 'images/noor.jpg', 'Red embroidered bridal lehenga with long sleeves and a matching dupatta', true, 12),
+  ('laila', 'Laila', 'kesar', 'Lehengas', 'lehenga', 'Raw silk with zardozi, net dupatta', array['red'], '#C6A15A', 7200, 26, false, true, 'Dense gold zardozi on red raw silk, with a heavily bordered net dupatta worn over the head.', 'images/laila.jpg', 'Red bridal lehenga with dense gold embroidery and a red veil dupatta', true, 13),
+  ('rani', 'Rani', 'kesar', 'Lehengas', 'lehenga', 'Silk velvet with dabka and zari', array['maroon','emerald'], '#C6A15A', 4200, 20, false, true, 'Velvet for a winter wedding, embroidered in dabka with an emerald border at the hem.', 'images/rani.jpg', 'Maroon velvet lehenga with gold embroidery and an emerald border', true, 14),
+  ('shirin', 'Shirin', 'kesar', 'Lehengas', 'lehenga', 'Organza with zardozi', array['coral','red'], '#D9B26A', 6800, 24, false, true, 'A long-line coral pishwas over a lehenga, worked in gold zardozi, with a trailing dupatta.', 'images/shirin.jpg', 'Coral bridal gown with dense gold embroidery and a long embroidered trail', true, 15),
+  ('gulnaar', 'Gulnaar', 'rasika', 'Lehengas', 'lehenga', 'Raw silk with resham and gota', array['ivory','blush'], '#D9A6A0', 5200, 22, false, true, 'Ivory raw silk embroidered all over in pastel resham, with a gota border and a sheer dupatta.', 'images/gulnaar.jpg', 'Ivory lehenga embroidered with pastel florals, with a matching blouse and dupatta', true, 16),
+  ('mira', 'Mira', 'rasika', 'Pre-wedding events', 'lehenga', 'Organza with mirror and sequin work', array['sage','blush'], '#E8E2D0', 2900, 14, true, true, 'Light enough to dance in. Made for mehndi and sangeet, with mirror work that catches the light.', 'images/mira.jpg', 'Sage green lehenga with mirror work and a sheer dupatta', true, 17),
+  ('gulabo', 'Gulabo', 'kesar', 'Pre-wedding events', 'lehenga', 'Organza with resham florals', array['blush','sage'], '#E8B9B4', 3200, 16, true, true, 'Blush organza scattered with resham flowers, for the nikah, engagement or a daytime ceremony.', 'images/gulabo.jpg', 'Blush pink lehenga with floral embroidery and a sheer dupatta', true, 18),
+  ('zoya', 'Zoya', 'rasika', 'Reception', 'ballgown', 'Sequinned tulle, crystal fringe', array['mink','champagne'], '#E9E4E0', 3400, 14, true, true, 'Tulle covered in geometric sequin work, with crystal fringe at the shoulders. Made for the reception entrance.', 'images/zoya.jpg', 'Mink tulle gown with geometric sequin work and crystal fringe at the shoulders', true, 19),
+  ('pilar', 'Pilar', 'haldane', 'Reception', 'mermaid', 'Silk crepe, gazar peplum', array['ivory'], '#F3ECDF', 2600, 12, true, false, 'A crepe column with a sculpted gazar peplum and a separate neck scarf. Unpin the peplum for the party.', 'images/pilar.jpg', 'Strapless crepe column gown with a sculpted bubble peplum and a neck scarf', true, 20)
 on conflict (id) do update set
   name = excluded.name, designer_id = excluded.designer_id, category = excluded.category, silhouette = excluded.silhouette,
   fabric = excluded.fabric, colors = excluded.colors, trim_color = excluded.trim_color, price_usd = excluded.price_usd,
   lead_weeks = excluded.lead_weeks, rush_available = excluded.rush_available, embellished = excluded.embellished,
-  description = excluded.description, sort = excluded.sort;
+  description = excluded.description, image_url = excluded.image_url, image_alt = excluded.image_alt,
+  active = excluded.active, sort = excluded.sort;
+
+-- Hide sample pieces from earlier versions of this file that are no longer in the catalogue.
+update public.products set active = false
+where id not in ('marguerite', 'aurelia', 'celeste', 'solene', 'odette', 'valentina', 'isabela', 'elodie', 'wren', 'aiko', 'hana', 'noor', 'laila', 'rani', 'shirin', 'gulnaar', 'mira', 'gulabo', 'zoya', 'pilar');

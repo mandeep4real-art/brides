@@ -253,6 +253,17 @@ dialog.drawer[open]{display:flex}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:100;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* photos */
+img.photo{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 20%;background:var(--panel)}
+.card-art:has(> img.photo),.arch:has(> img.photo),.mini:has(> img.photo),.thumb:has(> img.photo),.pd-art:has(> img.photo){padding:0;overflow:hidden}
+.card-hit:hover .card-art img.photo{transform:scale(1.03)}
+.card-art img.photo{transition:transform .5s ease}
+.mini img.photo,.thumb img.photo{aspect-ratio:3/4;height:auto}
+.pd-art:has(> img.photo){position:sticky;display:block}
+.pd-art img.photo{aspect-ratio:3/4;height:auto;max-height:none}
+@media (max-width:820px){.pd-art:has(> img.photo){position:relative}.pd-art img.photo{max-height:72vh;aspect-ratio:auto;height:72vh}}
+.photo-note{position:absolute;left:12px;right:12px;bottom:12px;background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);font-size:.8rem;padding:6px 10px;border-radius:8px;width:fit-content;max-width:calc(100% - 24px)}
+
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -290,7 +301,7 @@ dialog.drawer[open]{display:flex}
         <div class="hero-copy">
           <p class="eyebrow" id="hero-eyebrow">Designer bridal marketplace</p>
           <h1>Dressed for every day <em>of the wedding.</em></h1>
-          <p class="lede">Gowns, lehengas, reception looks and bridesmaid sets from independent ateliers. Every piece is made to order, so the catalogue works backwards from your date.</p>
+          <p class="lede">Wedding gowns, lehengas and reception looks from independent ateliers. Every piece is made to order, so the catalogue works backwards from your date.</p>
           <div class="datecard">
             <div class="row">
               <label for="wd">My wedding is on</label>
@@ -516,7 +527,8 @@ async function sbRpc(fn, args){
 const COLORS = {
   ivory:['Ivory','#F3ECDF'], champagne:['Champagne','#E6D2B0'], blush:['Blush','#E8C3C0'],
   red:['Sindoor red','#A32432'], marigold:['Marigold','#D8922A'], emerald:['Emerald','#1E5C4A'],
-  sage:['Sage','#A7B69C'], dusk:['Dusk blue','#9AAEC4'], gold:['Antique gold','#C6A15A'], black:['Black','#2A2629']
+  sage:['Sage','#A7B69C'], dusk:['Dusk blue','#9AAEC4'], gold:['Antique gold','#C6A15A'], black:['Black','#2A2629'],
+  mink:['Mink','#A8998F'], coral:['Coral','#D9806A'], maroon:['Maroon','#6E1F2A']
 };
 /* Built-in catalogue: shown until Supabase answers, and kept if it can't be reached. */
 let DESIGNERS = {
@@ -525,45 +537,48 @@ let DESIGNERS = {
   haldane:{name:'Haldane & Rowe', city:'London', spec:'Minimal crepe tailoring for city weddings'},
   sora:{name:'Sora Atelier', city:'Kyoto', spec:'Sculptural silk gazar and slip dresses'},
   rasika:{name:'Rasika Mehra Studio', city:'New Delhi', spec:'Zardozi and gota patti lehengas'},
-  kesar:{name:'Kesar House', city:'Varanasi', spec:'Handwoven Banarasi silk and velvet'},
-  juniper:{name:'Juniper Lane', city:'Portland', spec:'Mix-and-match bridesmaid colour stories'}
+  kesar:{name:'Kesar House', city:'Varanasi', spec:'Velvet and heirloom zardozi bridal sets'}
 };
 const SIL = {ballgown:'Ball gown', aline:'A-line', mermaid:'Mermaid', sheath:'Sheath', lehenga:'Lehenga', jumpsuit:'Jumpsuit', sari:'Sari'};
 const CATS = ['Wedding gowns','Lehengas','Reception','Pre-wedding events','Bridesmaids'];
 let P = [
-  {id:'celeste', name:'Céleste', d:'ondine', cat:'Wedding gowns', sil:'ballgown', fabric:'Silk mikado, hand-set pearls', colors:['ivory','champagne'], trim:'#C6A15A', price:4850, lead:20, rush:false, work:true, desc:'A full mikado skirt over a boned bodice, with pearls set by hand along the neckline and waist seam.'},
-  {id:'marguerite', name:'Marguerite', d:'lumbre', cat:'Wedding gowns', sil:'mermaid', fabric:'Chantilly lace over silk crepe', colors:['ivory','blush'], trim:'#FFFFFF', price:3600, lead:18, rush:true, work:true, desc:'Fitted through the knee and flaring into a scalloped lace hem. The lace is cut so the motifs meet at the seams.'},
-  {id:'wren', name:'Wren', d:'haldane', cat:'Wedding gowns', sil:'sheath', fabric:'Double-faced crepe', colors:['ivory','champagne'], trim:'#DCCFB8', price:2200, lead:12, rush:true, work:false, desc:'A clean column with a low back. No boning and no beading, so it is light enough for a long day.'},
-  {id:'aiko', name:'Aiko', d:'sora', cat:'Wedding gowns', sil:'aline', fabric:'Silk gazar', colors:['ivory'], trim:'#E9E2D6', price:3100, lead:16, rush:false, work:false, desc:'Folded gazar that holds its shape without a petticoat. Pockets sit in the side seams.'},
-  {id:'odette', name:'Odette', d:'ondine', cat:'Wedding gowns', sil:'aline', fabric:'Tulle with 3D silk florals', colors:['ivory','blush'], trim:'#E3A9AE', price:3950, lead:22, rush:false, work:true, desc:'Layered tulle scattered with silk petals that thin out toward the hem.'},
-  {id:'noor', name:'Noor', d:'rasika', cat:'Lehengas', sil:'lehenga', fabric:'Raw silk with zardozi', colors:['red','blush'], trim:'#C6A15A', price:6400, lead:24, rush:false, work:true, desc:'A twelve-kali skirt with a zardozi border, a matching blouse and a net dupatta finished in gota.'},
-  {id:'rani', name:'Rani', d:'kesar', cat:'Lehengas', sil:'lehenga', fabric:'Silk velvet with dabka', colors:['emerald','red'], trim:'#C6A15A', price:4200, lead:20, rush:false, work:true, desc:'Velvet for a winter wedding, embroidered in dabka and finished with a Banarasi dupatta.'},
-  {id:'gulnaar', name:'Gulnaar', d:'rasika', cat:'Pre-wedding events', sil:'lehenga', fabric:'Organza with gota patti', colors:['marigold','blush'], trim:'#E8C26A', price:2900, lead:14, rush:true, work:true, desc:'Light enough to dance in. Made for mehndi and sangeet, with a flared skirt and a short dupatta.'},
-  {id:'saffron', name:'Saffron', d:'kesar', cat:'Pre-wedding events', sil:'sari', fabric:'Handwoven Banarasi silk', colors:['marigold','red'], trim:'#C6A15A', price:1200, lead:10, rush:true, work:true, desc:'Woven in Varanasi with a zari border. Comes with an unstitched blouse piece, which we can tailor to your measurements.'},
-  {id:'tamsin', name:'Tamsin', d:'haldane', cat:'Pre-wedding events', sil:'sheath', fabric:'Wool-silk crepe', colors:['dusk','ivory'], trim:'#B9C6D6', price:680, lead:6, rush:false, work:false, desc:'A midi sheath for the rehearsal dinner or the registry office.'},
-  {id:'pilar', name:'Pilar', d:'lumbre', cat:'Reception', sil:'jumpsuit', fabric:'Silk crepe, lace cape', colors:['ivory','black'], trim:'#F3ECDF', price:1850, lead:10, rush:true, work:false, desc:'Wide-leg jumpsuit with a detachable floor-length lace cape for the entrance.'},
-  {id:'isadora', name:'Isadora', d:'ondine', cat:'Reception', sil:'sheath', fabric:'Beaded tulle', colors:['champagne','gold'], trim:'#FFFFFF', price:2750, lead:14, rush:false, work:true, desc:'A column covered in glass bugle beads, cut to move under reception lights.'},
-  {id:'hana', name:'Hana', d:'sora', cat:'Reception', sil:'aline', fabric:'Silk charmeuse', colors:['champagne','ivory'], trim:'#E6D2B0', price:1450, lead:8, rush:true, work:false, desc:'A bias-cut slip dress for the after-party. The cowl back is weighted so it stays in place.'},
-  {id:'fern', name:'Fern', d:'juniper', cat:'Bridesmaids', sil:'aline', fabric:'Recycled chiffon', colors:['sage','dusk','blush'], trim:'#FFFFFF', price:240, lead:8, rush:true, work:false, desc:'A wrap-front chiffon A-line in 14 sizes. It mixes with Clover for a coordinated party.'},
-  {id:'clover', name:'Clover', d:'juniper', cat:'Bridesmaids', sil:'sheath', fabric:'Stretch satin', colors:['sage','emerald','champagne'], trim:'#FFFFFF', price:210, lead:8, rush:true, work:false, desc:'Square neck and adjustable straps. The stretch makes it forgiving to buy online.'},
-  {id:'mira', name:'Mira', d:'juniper', cat:'Bridesmaids', sil:'lehenga', fabric:'Georgette with mirror work', colors:['blush','sage','marigold'], trim:'#E8E2D0', price:480, lead:10, rush:true, work:true, desc:'A lightweight lehenga set for bridesmaids, with a crop blouse and a georgette dupatta.'}
+  {id:'marguerite', name:'Marguerite', d:'lumbre', cat:'Wedding gowns', sil:'mermaid', fabric:'Chantilly lace, lace capelet', colors:['ivory','blush'], trim:'#FFFFFF', price:3600, lead:18, rush:true, work:true, img:'images/marguerite.jpg', alt:'Fitted lace mermaid gown with a high-neck lace capelet and flutter sleeves', desc:'Fitted through the knee and flaring into a scalloped hem, with a detachable high-neck lace capelet.'},
+  {id:'aurelia', name:'Aurelia', d:'ondine', cat:'Wedding gowns', sil:'aline', fabric:'Embroidered lace on tulle', colors:['ivory'], trim:'#FFFFFF', price:4200, lead:20, rush:false, work:true, img:'images/aurelia.jpg', alt:'Long-sleeve lace A-line gown with a high illusion collar and plunging bodice', desc:'Lace sleeves and a high illusion collar over a plunging bodice, finished with a chapel train.'},
+  {id:'celeste', name:'Céleste', d:'ondine', cat:'Wedding gowns', sil:'ballgown', fabric:'Corded lace over tulle, boned corset', colors:['ivory'], trim:'#FFFFFF', price:4850, lead:20, rush:false, work:true, img:'images/celeste.jpg', alt:'Strapless lace ball gown with a corseted bodice and full skirt', desc:'A strapless corset with a scalloped lace edge over a full layered skirt. Pockets sit in the side seams.'},
+  {id:'solene', name:'Solène', d:'lumbre', cat:'Wedding gowns', sil:'ballgown', fabric:'Floral lace on organza', colors:['ivory'], trim:'#FFFFFF', price:3900, lead:18, rush:true, work:true, img:'images/solene.jpg', alt:'Lace ball gown with thin straps and a sweetheart neckline', desc:'Thin straps, a sweetheart neckline and a basque waist over a full lace skirt.'},
+  {id:'odette', name:'Odette', d:'ondine', cat:'Wedding gowns', sil:'aline', fabric:'Guipure lace', colors:['ivory'], trim:'#FFFFFF', price:5600, lead:24, rush:false, work:true, img:'images/odette.jpg', alt:'Long-sleeve guipure lace A-line gown with a cathedral train', desc:'Guipure lace from neck to hem, with long sleeves and a cathedral-length train.'},
+  {id:'valentina', name:'Valentina', d:'lumbre', cat:'Wedding gowns', sil:'ballgown', fabric:'Lace appliqué on tulle, lace-edged veil', colors:['ivory'], trim:'#FFFFFF', price:5200, lead:20, rush:false, work:true, img:'images/valentina.jpg', alt:'Strapless lace ball gown with a front slit, worn with a long lace-edged veil', desc:'A strapless lace ball gown with a front slit. The matching cathedral veil is edged in the same lace.'},
+  {id:'isabela', name:'Isabela', d:'lumbre', cat:'Wedding gowns', sil:'mermaid', fabric:'Crepe with lace appliqué', colors:['ivory'], trim:'#FFFFFF', price:4100, lead:18, rush:false, work:true, img:'images/isabela.jpg', alt:'Off-the-shoulder crepe mermaid gown with a sheer lace bodice and lace train', desc:'A sheer lace bodice with one off-the-shoulder strap, over a crepe mermaid skirt and a wide lace train.'},
+  {id:'elodie', name:'Élodie', d:'ondine', cat:'Wedding gowns', sil:'aline', fabric:'Layered tulle with lace appliqué', colors:['ivory','blush'], trim:'#FFFFFF', price:3300, lead:16, rush:true, work:true, img:'images/elodie.jpg', alt:'Tulle A-line gown with an open back and long train, seen from behind', desc:'Soft layered tulle with lace at the bodice, an open back and a long sweeping train.'},
+  {id:'wren', name:'Wren', d:'haldane', cat:'Wedding gowns', sil:'mermaid', fabric:'Double-faced crepe', colors:['ivory','champagne'], trim:'#DCCFB8', price:2200, lead:12, rush:true, work:false, img:'images/wren.jpg', alt:'Strapless draped crepe mermaid gown with a long train', desc:'A draped crepe bodice and fitted mermaid skirt with a long train. No boning and no beading, so it is light enough for a long day.'},
+  {id:'aiko', name:'Aiko', d:'sora', cat:'Wedding gowns', sil:'aline', fabric:'Duchess satin', colors:['ivory'], trim:'#E9E2D6', price:2800, lead:14, rush:true, work:false, img:'images/aiko.jpg', alt:'Strapless satin A-line gown with a pleated bodice and front slit', desc:'A pleated sweetheart bodice and a full satin skirt with a front slit and pockets.'},
+  {id:'hana', name:'Hana', d:'sora', cat:'Wedding gowns', sil:'sheath', fabric:'Silk satin', colors:['ivory','champagne'], trim:'#E6D2B0', price:2400, lead:12, rush:true, work:false, img:'images/hana.jpg', alt:'Satin fit-and-flare gown with thin straps and a corseted bodice', desc:'A corseted satin bodice on thin straps, falling into a fluted skirt with a short train.'},
+  {id:'noor', name:'Noor', d:'rasika', cat:'Lehengas', sil:'lehenga', fabric:'Net with zardozi and sequins', colors:['red','maroon'], trim:'#C6A15A', price:6400, lead:24, rush:false, work:true, img:'images/noor.jpg', alt:'Red embroidered bridal lehenga with long sleeves and a matching dupatta', desc:'Red net worked all over in zardozi and sequins, with a long-sleeve blouse and a matching dupatta.'},
+  {id:'laila', name:'Laila', d:'kesar', cat:'Lehengas', sil:'lehenga', fabric:'Raw silk with zardozi, net dupatta', colors:['red'], trim:'#C6A15A', price:7200, lead:26, rush:false, work:true, img:'images/laila.jpg', alt:'Red bridal lehenga with dense gold embroidery and a red veil dupatta', desc:'Dense gold zardozi on red raw silk, with a heavily bordered net dupatta worn over the head.'},
+  {id:'rani', name:'Rani', d:'kesar', cat:'Lehengas', sil:'lehenga', fabric:'Silk velvet with dabka and zari', colors:['maroon','emerald'], trim:'#C6A15A', price:4200, lead:20, rush:false, work:true, img:'images/rani.jpg', alt:'Maroon velvet lehenga with gold embroidery and an emerald border', desc:'Velvet for a winter wedding, embroidered in dabka with an emerald border at the hem.'},
+  {id:'shirin', name:'Shirin', d:'kesar', cat:'Lehengas', sil:'lehenga', fabric:'Organza with zardozi', colors:['coral','red'], trim:'#D9B26A', price:6800, lead:24, rush:false, work:true, img:'images/shirin.jpg', alt:'Coral bridal gown with dense gold embroidery and a long embroidered trail', desc:'A long-line coral pishwas over a lehenga, worked in gold zardozi, with a trailing dupatta.'},
+  {id:'gulnaar', name:'Gulnaar', d:'rasika', cat:'Lehengas', sil:'lehenga', fabric:'Raw silk with resham and gota', colors:['ivory','blush'], trim:'#D9A6A0', price:5200, lead:22, rush:false, work:true, img:'images/gulnaar.jpg', alt:'Ivory lehenga embroidered with pastel florals, with a matching blouse and dupatta', desc:'Ivory raw silk embroidered all over in pastel resham, with a gota border and a sheer dupatta.'},
+  {id:'mira', name:'Mira', d:'rasika', cat:'Pre-wedding events', sil:'lehenga', fabric:'Organza with mirror and sequin work', colors:['sage','blush'], trim:'#E8E2D0', price:2900, lead:14, rush:true, work:true, img:'images/mira.jpg', alt:'Sage green lehenga with mirror work and a sheer dupatta', desc:'Light enough to dance in. Made for mehndi and sangeet, with mirror work that catches the light.'},
+  {id:'gulabo', name:'Gulabo', d:'kesar', cat:'Pre-wedding events', sil:'lehenga', fabric:'Organza with resham florals', colors:['blush','sage'], trim:'#E8B9B4', price:3200, lead:16, rush:true, work:true, img:'images/gulabo.jpg', alt:'Blush pink lehenga with floral embroidery and a sheer dupatta', desc:'Blush organza scattered with resham flowers, for the nikah, engagement or a daytime ceremony.'},
+  {id:'zoya', name:'Zoya', d:'rasika', cat:'Reception', sil:'ballgown', fabric:'Sequinned tulle, crystal fringe', colors:['mink','champagne'], trim:'#E9E4E0', price:3400, lead:14, rush:true, work:true, img:'images/zoya.jpg', alt:'Mink tulle gown with geometric sequin work and crystal fringe at the shoulders', desc:'Tulle covered in geometric sequin work, with crystal fringe at the shoulders. Made for the reception entrance.'},
+  {id:'pilar', name:'Pilar', d:'haldane', cat:'Reception', sil:'mermaid', fabric:'Silk crepe, gazar peplum', colors:['ivory'], trim:'#F3ECDF', price:2600, lead:12, rush:true, work:false, img:'images/pilar.jpg', alt:'Strapless crepe column gown with a sculpted bubble peplum and a neck scarf', desc:'A crepe column with a sculpted gazar peplum and a separate neck scarf. Unpin the peplum for the party.'}
 ];
 const REVIEWS = {
   celeste:[{n:'Hélène M.', m:'5\'7″ · ordered size 8 · 9 months out', fit:'Waist taken in 1″', t:'Heavier than I expected, in a good way. My seamstress said the inner corset made the alterations easy.'}],
   marguerite:[{n:'Lucía R.', m:'5\'3″ · made to measure · 7 months out', fit:'No alterations needed', t:'Hem was exact with my 3″ heels. Delivered two weeks before the date they gave me.'}],
   noor:[{n:'Ananya K.', m:'5\'2″ · made to measure · 8 months out', fit:'Blouse adjusted once', t:'The zardozi is dense but the skirt still felt manageable through a long ceremony.'}],
   wren:[{n:'Grace T.', m:'5\'10″ · ordered size 12 · 5 months out', fit:'Hemmed 1″', t:'The crepe does not wrinkle. I sat through a two-hour dinner and it looked the same after.'}],
-  fern:[{n:'Maya P.', m:'Party of 6 · sizes 4 to 18', fit:'True to size', t:'We ordered the sage and the dusk blue together. Both colours matched the swatches exactly.'}]
+  mira:[{n:'Maya P.', m:'5\'6″ · ordered size 10 · 4 months out', fit:'True to size', t:'The sage matched the swatch exactly, and the mirror work looked even better under the sangeet lights.'}]
 };
 const BRIDES = [
   {who:'Ananya & Rohan', place:'Udaipur', venue:'Palace', height:'Petite', pid:'noor', ordered:'8 months out', fit:'5\'2″ · made to measure', q:'I wanted red and I wanted it heavy. It photographed better than any lehenga I tried in a shop.'},
   {who:'Lucía & Tom', place:'Seville', venue:'Church', height:'Petite', pid:'marguerite', ordered:'7 months out', fit:'5\'3″ · made to measure', q:'The lace hem came out exactly where the order form said it would.'},
   {who:'Grace & Femi', place:'London', venue:'City hall', height:'Tall', pid:'wren', ordered:'5 months out', fit:'5\'10″ · size 12', q:'Simple, and very comfortable. I wore it to the pub after the ceremony.'},
   {who:'Hélène & Marc', place:'Bordeaux', venue:'Garden', height:'Tall', pid:'celeste', ordered:'9 months out', fit:'5\'7″ · size 8', q:'The skirt was enormous and I loved every inch of it.'},
-  {who:'Keiko & Dan', place:'Big Sur', venue:'Beach', height:'Average', pid:'aiko', ordered:'6 months out', fit:'5\'5″ · size 6', q:'The gazar held its shape in the wind, which I did not expect from silk.'},
+  {who:'Keiko & Dan', place:'Big Sur', venue:'Beach', height:'Average', pid:'aiko', ordered:'6 months out', fit:'5\'5″ · size 6', q:'The satin held its shape in the wind, and the slit made walking on sand easy.'},
   {who:'Sana & Imran', place:'Lahore', venue:'Ballroom', height:'Average', pid:'rani', ordered:'7 months out', fit:'5\'5″ · made to measure', q:'Velvet in December was the right call. My mother cried at the first fitting.'},
-  {who:'Priya & Josh', place:'Napa', venue:'Garden', height:'Average', pid:'gulnaar', ordered:'4 months out', fit:'5\'6″ · size 10', q:'I danced for the whole sangeet and nothing slipped.'},
-  {who:'Nadia & Leo', place:'Chicago', venue:'Ballroom', height:'Tall', pid:'isadora', ordered:'4 months out', fit:'5\'9″ · size 4', q:'It caught every light in the room. I changed into it for the first dance.'}
+  {who:'Priya & Josh', place:'Napa', venue:'Garden', height:'Average', pid:'mira', ordered:'4 months out', fit:'5\'6″ · size 10', q:'I danced for the whole sangeet and nothing slipped.'},
+  {who:'Nadia & Leo', place:'Chicago', venue:'Ballroom', height:'Tall', pid:'zoya', ordered:'4 months out', fit:'5\'9″ · size 4', q:'It caught every light in the room. I changed into it for the first dance.'}
 ];
 const OPT = {
   gown:[['Neckline',[['As designed',0],['Square',120],['Illusion high neck',280]]],['Sleeves',[['None',0],['Cap',150],['Detachable long',380]]],['Train',[['Sweep',0],['Chapel',220],['Cathedral',540]]]],
@@ -646,7 +661,18 @@ function croquis(sil, fill, trim, work){
     ${extra}
   </svg>`;
 }
-const art = (p, ci = 0) => croquis(p.sil, COLORS[p.colors[ci]][1], p.trim, p.work);
+const sketch = (p, ci = 0) => croquis(p.sil, COLORS[p.colors[ci]][1], p.trim, p.work);
+const escAttr = s => String(s).replace(/[&"<>]/g, c => ({'&':'&amp;','"':'&quot;','<':'&lt;','>':'&gt;'}[c]));
+/* Product photo when there is one; the drawn sketch otherwise (or if the photo fails to load). */
+const art = (p, ci = 0) => p.img
+  ? `<img class="photo" src="${escAttr(p.img)}" alt="${escAttr(p.alt || p.name)}" loading="lazy" decoding="async" data-pid="${escAttr(p.id)}" data-ci="${ci}">`
+  : sketch(p, ci);
+document.addEventListener('error', e => {
+  const im = e.target;
+  if (im.tagName !== 'IMG' || !im.classList.contains('photo')) return;
+  const p = byId(im.dataset.pid);
+  if (p) im.outerHTML = sketch(p, +im.dataset.ci || 0);
+}, true);
 const heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
 
 /* hero */
@@ -669,14 +695,15 @@ function renderHero(){
   $('#plan').innerHTML = steps.map((s, i) =>
     `<li class="${s[1] < today ? 'past' : ''}"><span class="n">STEP ${i+1}</span><span class="d">${fmt(s[1],{month:'short',day:'numeric'})}</span><span class="t"><b>${s[0]}.</b> ${s[1] < today ? 'This date has passed. A stylist can help you plan with rush options.' : s[2]}</span></li>`
   ).join('') || '<li class="t">Add your wedding date above to build the timeline.</li>';
-  const heroIds = ['celeste','noor','pilar'].filter(byId);
+  const heroIds = ['celeste','noor','zoya'].filter(byId);
   const heroPieces = heroIds.length === 3 ? heroIds.map(byId) : P.slice(0, 3);
   $('#arches').innerHTML = heroPieces.map(p => `<div class="arch">${art(p)}</div>`).join('');
 }
 
 /* shop */
 function renderFilters(){
-  $('#cat-chips').innerHTML = ['All', ...CATS].map(c => `<button class="chip" type="button" data-cat="${c}" aria-pressed="${S.cat === c}">${c}</button>`).join('');
+  if (S.cat !== 'All' && !P.some(p => p.cat === S.cat)) S.cat = 'All';
+  $('#cat-chips').innerHTML = ['All', ...CATS.filter(c => P.some(p => p.cat === c))].map(c => `<button class="chip" type="button" data-cat="${c}" aria-pressed="${S.cat === c}">${c}</button>`).join('');
 }
 function filtered(){
   let list = P.filter(p =>
@@ -712,7 +739,7 @@ function renderGrid(){
 
 /* designers */
 function renderDesigners(){
-  $('#dgrid').innerHTML = Object.entries(DESIGNERS).map(([k, d]) => {
+  $('#dgrid').innerHTML = Object.entries(DESIGNERS).filter(([k]) => P.some(p => p.d === k)).map(([k, d]) => {
     const items = P.filter(p => p.d === k);
     const from = Math.min(...items.map(p => p.price));
     return `<div class="dcard"><p class="eyebrow">${d.city}</p><h3>${d.name}</h3><p class="spec">${d.spec}</p>
@@ -826,7 +853,8 @@ function configTotal(c){
 }
 function updateProduct(){
   const c = cur; const p = c.p;
-  $('#pd-art').innerHTML = art(p, c.ci);
+  $('#pd-art').innerHTML = art(p, c.ci) +
+    (p.img && p.colors.length > 1 ? `<p class="photo-note">Photo shows ${COLORS[p.colors[0]][0]}${c.ci ? `. Order a ${COLORS[p.colors[c.ci]][0].toLowerCase()} swatch to see the colour` : ''}</p>` : '');
   $('#pd-std').hidden = c.mode !== 'std'; $('#pd-std-note').hidden = c.mode !== 'std';
   $('#pd-mtm').hidden = c.mode !== 'mtm';
   const t = timing(p, c.rush);
@@ -1100,7 +1128,8 @@ async function loadCatalogue(){
     P = ps.filter(p => DESIGNERS[p.designer_id] && SIL[p.silhouette]).map(p => ({
       id:p.id, name:p.name, d:p.designer_id, cat:p.category, sil:p.silhouette, fabric:p.fabric || '',
       colors:(p.colors || []).filter(c => COLORS[c]).length ? p.colors.filter(c => COLORS[c]) : ['ivory'],
-      trim:p.trim_color || '#C6A15A', price:p.price_usd, lead:p.lead_weeks, rush:p.rush_available, work:p.embellished, desc:p.description || ''
+      trim:p.trim_color || '#C6A15A', price:p.price_usd, lead:p.lead_weeks, rush:p.rush_available, work:p.embellished, desc:p.description || '',
+      img:p.image_url || '', alt:p.image_alt || ''
     }));
     S.board = S.board.filter(byId);
     S.bag = S.bag.filter(x => byId(x.id));
@@ -1123,6 +1152,7 @@ function renderAll(){
 /* init */
 const ssel = $('#f-sil'); Object.entries(SIL).forEach(([k,s]) => ssel.add(new Option(s, k)));
 $('#b-type').addEventListener('change', renderSlots);
+S.board = S.board.filter(byId); S.bag = S.bag.filter(x => byId(x.id));
 renderAll(); renderFinder(); renderBooking();
 loadCatalogue();
 })();
