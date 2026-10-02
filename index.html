@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A marketplace for designer bridal wear that works back from your wedding date.">
+<title>Trousseau Row</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..600&family=Figtree:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: boutique-mirror arches in the hero, a date-aware catalogue grid, then fit, stories and booking as quiet editorial sections. */
+:root{
+  --bg:#F7F3F2; --surface:#FFFFFF; --panel:#EFE6E6; --ink:#2A1B28; --muted:#6C5D67; --line:#DED2D4;
+  --accent:#8C3150; --accent-ink:#FFFFFF; --gold:#94733A;
+  --ok:#2E6A4E; --warn:#8F6210; --bad:#A3342E;
+  --display:"Bodoni Moda", "Bodoni 72", Didot, Georgia, serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"DM Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#170F15; --surface:#211820; --panel:#2B2029; --ink:#F3EAEE; --muted:#B5A4AE; --line:#3E303B;
+  --accent:#DE84A0; --accent-ink:#1B0F16; --gold:#D4B06C; --ok:#72C79E; --warn:#E6B356; --bad:#F08E84; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#170F15; --surface:#211820; --panel:#2B2029; --ink:#F3EAEE; --muted:#B5A4AE; --line:#3E303B;
+  --accent:#DE84A0; --accent-ink:#1B0F16; --gold:#D4B06C; --ok:#72C79E; --warn:#E6B356; --bad:#F08E84; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1200px;margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+section{padding-block:clamp(56px,8vw,96px)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px 32px;margin-bottom:28px}
+.sec-head h2{font-size:clamp(2rem,4vw,3rem)}
+.sec-head p.lede{max-width:52ch;color:var(--muted)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:12px 22px;border:1px solid var(--ink);background:transparent;cursor:pointer;font-weight:500;text-decoration:none;transition:background .15s,color .15s}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08);background:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:8px 14px;font-size:.88rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+.proto{background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-align:center;padding:7px 16px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:64px}
+.logo{font-family:var(--display);font-size:1.45rem;font-style:italic;text-decoration:none;white-space:nowrap}
+.logo b{font-style:normal;font-weight:600}
+.nav{display:flex;gap:22px;margin-right:auto}
+.nav a{text-decoration:none;font-size:.94rem;color:var(--muted)}
+.nav a:hover{color:var(--ink)}
+.icons{display:flex;gap:6px;margin-left:auto}
+.iconbtn{position:relative;display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid transparent;border-radius:999px;padding:8px 12px;cursor:pointer;font-size:.92rem}
+.iconbtn:hover{border-color:var(--line)}
+.iconbtn svg{width:18px;height:18px}
+.count{font-family:var(--mono);font-size:.72rem;background:var(--accent);color:var(--accent-ink);border-radius:999px;min-width:20px;padding:1px 6px;text-align:center}
+@media (max-width:820px){.nav{display:none}.iconbtn .lbl{display:none}}
+
+/* hero */
+.hero{padding-block:clamp(40px,6vw,72px) 0}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(24px,5vw,64px);align-items:end}
+.hero h1{font-size:clamp(2.7rem,6.4vw,5.4rem);letter-spacing:-.01em;margin-top:14px}
+.hero h1 em{color:var(--accent);font-weight:400}
+.hero-copy{min-width:0}
+.hero-copy > p.lede{max-width:46ch;color:var(--muted);margin-top:20px;font-size:1.06rem}
+.datecard{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 22px;display:grid;gap:14px;max-width:560px}
+.datecard .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.datecard label{font-family:var(--display);font-size:1.35rem;font-style:italic}
+.datecard input[type=date]{border:0;border-bottom:1.5px solid var(--ink);background:transparent;font-family:var(--mono);font-size:1.05rem;padding:4px 2px}
+.datecard .verdict{color:var(--muted)}
+.datecard .verdict strong{color:var(--ink);font-weight:600}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+.arches{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:end}
+.arch{background:var(--panel);border-radius:999px 999px 6px 6px;aspect-ratio:1/2.1;max-width:100%;display:flex;align-items:flex-end;justify-content:center;padding:18% 6% 4%;color:var(--muted);border:1px solid var(--line)}
+.arch:nth-child(2){aspect-ratio:1/2.45;background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.arch svg{width:100%;height:auto}
+.arch-cap{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:8px}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr}.arches{max-width:420px}}
+
+/* planning timeline */
+.plan{margin-top:clamp(40px,6vw,64px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding-block:22px}
+.plan ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.plan li{display:grid;gap:4px;min-width:0}
+.plan .n{font-family:var(--mono);font-size:.7rem;color:var(--gold);letter-spacing:.1em}
+.plan .d{font-family:var(--display);font-size:1.3rem}
+.plan .t{font-size:.86rem;color:var(--muted)}
+.plan .past .d{color:var(--bad)}
+@media (max-width:900px){.plan ol{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:420px){.plan ol{grid-template-columns:1fr}}
+
+/* filters */
+.filters{display:grid;gap:14px;margin-bottom:26px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.selects{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.selects select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:.9rem;max-width:100%}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.toggle input{accent-color:var(--accent);width:18px;height:18px}
+.result-count{margin-left:auto;font-family:var(--mono);font-size:.8rem;color:var(--muted)}
+
+/* product grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:28px 20px}
+@media (max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}}
+.card{position:relative;min-width:0}
+.card-hit{display:grid;gap:12px;width:100%;text-align:left;background:none;border:0;padding:0;cursor:pointer}
+.card-art{background:var(--panel);border-radius:var(--r);aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:center;padding:14% 14% 4%;color:var(--muted);transition:background .2s;overflow:hidden}
+.card-hit:hover .card-art{background:color-mix(in srgb,var(--accent) 10%,var(--panel))}
+.card-art svg{width:100%;height:100%;transition:transform .35s ease}
+.card-hit:hover .card-art svg{transform:translateY(-4px)}
+.card h3{font-size:1.32rem}
+.card .meta{font-size:.86rem;color:var(--muted);margin-top:2px}
+.card-foot{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;margin-top:6px}
+.price{font-family:var(--mono);font-size:.9rem;font-variant-numeric:tabular-nums}
+.pill{font-family:var(--mono);font-size:.7rem;border-radius:999px;padding:3px 9px;white-space:nowrap;border:1px solid currentColor}
+.pill.ok{color:var(--ok)} .pill.soon{color:var(--warn)} .pill.late{color:var(--bad)} .pill.none{color:var(--muted)}
+.save{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink);box-shadow:0 1px 4px rgb(0 0 0 / .08)}
+.save svg{width:18px;height:18px}
+.save[aria-pressed="true"]{color:var(--accent)}
+.save[aria-pressed="true"] svg path{fill:currentColor}
+.empty{grid-column:1/-1;padding:48px 24px;text-align:center;border:1px dashed var(--line);border-radius:var(--r);color:var(--muted)}
+
+/* designers */
+.designers{background:var(--panel)}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.dcard{background:var(--bg);padding:22px;display:grid;gap:8px;align-content:start}
+.dcard h3{font-size:1.5rem}
+.dcard .spec{color:var(--muted);font-size:.92rem}
+.dcard .foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:10px}
+
+/* brides */
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:20px}
+.bcard{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);display:grid;grid-template-columns:90px 1fr;gap:16px;padding:16px;min-width:0}
+.bcard .mini{background:var(--panel);border-radius:999px 999px 4px 4px;padding:16px 8px 4px;color:var(--muted);align-self:start}
+.bcard blockquote{margin:0;font-family:var(--display);font-style:italic;font-size:1.06rem;line-height:1.35}
+.bcard .who{font-weight:600;font-size:.92rem;margin-top:10px}
+.bcard .facts{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.bcard .facts span{white-space:nowrap}
+.filterrow{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:22px;align-items:center}
+.filterrow .eyebrow{margin-right:4px}
+
+/* fit */
+.fit-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,5vw,56px)}
+@media (max-width:860px){.fit-grid{grid-template-columns:1fr}}
+.measures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 28px;margin:0}
+@media (max-width:520px){.measures{grid-template-columns:1fr}}
+.measures div{border-top:1px solid var(--line);padding-top:12px}
+.measures dt{font-family:var(--display);font-size:1.2rem}
+.measures dd{margin:4px 0 0;color:var(--muted);font-size:.92rem}
+.finder{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:16px;align-content:start}
+.finder h3{font-size:1.6rem}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:.8rem;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 10px;width:100%;font-family:var(--mono);font-size:.95rem}
+.field textarea{font-family:var(--body)}
+.finder-out{border-top:1px solid var(--line);padding-top:14px;min-height:64px}
+.finder-out .big{font-family:var(--display);font-size:2.2rem}
+.chart-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table.chart{border-collapse:collapse;font-family:var(--mono);font-size:.78rem;font-variant-numeric:tabular-nums;width:100%;min-width:560px}
+table.chart th,table.chart td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--line)}
+table.chart th{color:var(--muted);font-weight:500}
+table.chart td.hit{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--ink);font-weight:600}
+
+/* booking */
+.book{background:var(--ink);color:var(--bg)}
+.book .eyebrow,.book .lede{color:color-mix(in srgb,var(--bg) 70%,var(--ink))}
+.book-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(24px,5vw,64px)}
+@media (max-width:860px){.book-grid{grid-template-columns:1fr}}
+.book h2{font-size:clamp(2.2rem,4.5vw,3.4rem)}
+.book ul.perks{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px}
+.book ul.perks li{border-top:1px solid color-mix(in srgb,var(--bg) 22%,var(--ink));padding-top:12px;font-size:.95rem}
+.bform{background:var(--surface);color:var(--ink);border-radius:16px;padding:clamp(18px,3vw,28px);display:grid;gap:20px}
+.bform fieldset{border:0;padding:0;margin:0;display:grid;gap:10px;min-width:0}
+.bform legend{font-family:var(--display);font-size:1.15rem;margin-bottom:8px;padding:0}
+.opt{position:relative;display:inline-flex}
+.opt input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.opt span{border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:.88rem;background:var(--bg);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.opt input:checked + span{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.opt input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.opt input:disabled + span{opacity:.4;text-decoration:line-through;cursor:not-allowed}
+.opt .delta{font-family:var(--mono);font-size:.74rem;opacity:.75}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:520px){.two,.fields{grid-template-columns:1fr 1fr}}
+.confirm{border:1px solid var(--ok);border-radius:12px;padding:18px;display:grid;gap:6px}
+.confirm h3{font-size:1.5rem}
+.err{color:var(--bad);font-size:.88rem}
+.note{font-size:.82rem;color:var(--muted)}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding-block:48px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:28px}
+.fgrid h4{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:500}
+.fgrid p{font-size:.9rem;color:var(--muted)}
+
+/* dialogs */
+dialog{border:0;padding:0;background:var(--surface);color:var(--ink);max-width:min(1040px,calc(100vw - 24px));width:100%;border-radius:16px;max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgb(20 10 18 / .55)}
+.dclose{position:absolute;top:12px;right:12px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:1.2rem;line-height:1}
+.pd-grid{display:grid;grid-template-columns:.9fr 1.1fr;min-height:0}
+@media (max-width:820px){.pd-grid{grid-template-columns:1fr}}
+.pd-art{background:var(--panel);display:flex;align-items:flex-end;justify-content:center;padding:12% 14% 4%;color:var(--muted);position:sticky;top:0;align-self:start;min-height:100%}
+@media (max-width:820px){.pd-art{position:static;padding:8% 26% 2%}}
+.pd-art svg{width:100%;height:auto;max-height:70vh}
+.pd-info{padding:clamp(20px,3vw,36px);display:grid;gap:22px;min-width:0}
+.pd-info h2{font-size:clamp(2.2rem,4vw,3rem)}
+.pd-info fieldset{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+.pd-info legend{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0;margin-bottom:8px}
+.dot{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);display:inline-block}
+.tbox{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
+.tbox .head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.tbar{height:6px;border-radius:999px;background:var(--panel);position:relative;overflow:hidden;margin-top:4px}
+.tbar i{position:absolute;inset:0 auto 0 0;border-radius:999px}
+.breakdown{display:grid;gap:6px;font-size:.92rem}
+.breakdown .ln{display:flex;justify-content:space-between;gap:12px}
+.breakdown .ln span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.breakdown .tot{border-top:1px solid var(--line);padding-top:8px;font-weight:600;font-size:1rem}
+.breakdown .dep{color:var(--muted);font-size:.86rem}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.reviews{display:grid;gap:14px;border-top:1px solid var(--line);padding-top:18px}
+.review{display:grid;gap:4px}
+.review .rmeta{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.review p{font-size:.93rem}
+.fitbadge{font-family:var(--mono);font-size:.7rem;color:var(--ok)}
+
+dialog.drawer{margin:0 0 0 auto;height:100dvh;max-height:100dvh;max-width:min(440px,100vw);border-radius:0;display:none;flex-direction:column}
+dialog.drawer[open]{display:flex}
+.dr-head{padding:22px 22px 14px;border-bottom:1px solid var(--line);padding-top:calc(22px + env(safe-area-inset-top,0px))}
+.dr-head h2{font-size:1.9rem}
+.dr-body{padding:16px 22px;overflow-y:auto;flex:1;display:grid;gap:14px;align-content:start}
+.dr-foot{padding:16px 22px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:grid;gap:10px}
+.line{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:14px}
+.line .thumb{background:var(--panel);border-radius:6px;padding:8px 6px 2px;color:var(--muted)}
+.line h3{font-size:1.15rem}
+.line .sub{font-size:.8rem;color:var(--muted)}
+.line .lact{display:flex;gap:12px;margin-top:6px;font-size:.84rem}
+.swatchline{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.swatchline i{width:22px;height:22px;border-radius:4px;border:1px solid var(--line)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:100;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="proto">PROTOTYPE · Sample designers, prices and stories. Nothing is charged, booked or sent.</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top">Trousseau <b>Row</b></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#designers">Designers</a>
+      <a href="#brides">Real brides</a>
+      <a href="#fit">Fit &amp; sizing</a>
+      <a href="#book">Book a stylist</a>
+    </nav>
+    <div class="icons">
+      <button class="iconbtn" id="open-board" type="button" aria-label="Open wedding board">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+        <span class="lbl">Board</span><span class="count" id="board-count">0</span>
+      </button>
+      <button class="iconbtn" id="open-bag" type="button" aria-label="Open bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+        <span class="lbl">Bag</span><span class="count" id="bag-count">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Designer bridal marketplace · 7 ateliers · 16 pieces</p>
+          <h1>Dressed for every day <em>of the wedding.</em></h1>
+          <p class="lede">Gowns, lehengas, reception looks and bridesmaid sets from independent ateliers. Every piece is made to order, so the catalogue works backwards from your date.</p>
+          <div class="datecard">
+            <div class="row">
+              <label for="wd">My wedding is on</label>
+              <input type="date" id="wd">
+            </div>
+            <p class="verdict" id="verdict"></p>
+            <div class="hero-cta">
+              <a class="btn primary" href="#shop" id="cta-intime">Shop pieces that arrive in time</a>
+              <a class="btn" href="#book">Book a free stylist call</a>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="arches" id="arches"></div>
+          <div class="arches" aria-hidden="true" style="margin-top:0">
+            <p class="arch-cap">Ceremony</p><p class="arch-cap">Pheras</p><p class="arch-cap">Reception</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="plan" aria-labelledby="plan-h">
+        <p class="eyebrow" id="plan-h" style="margin-bottom:14px">Your dress timeline, worked back from the date</p>
+        <ol id="plan"></ol>
+      </div>
+    </div>
+  </div>
+
+  <section id="shop">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">The collection</p><h2>Shop the row</h2></div>
+        <p class="lede">Each card shows the last day to order for your date. That allows for production, shipping and four weeks of fittings.</p>
+      </div>
+      <div class="filters">
+        <div class="chips" id="cat-chips" role="group" aria-label="Category"></div>
+        <div class="selects">
+          <label class="sr" for="f-designer">Designer</label>
+          <select id="f-designer"><option value="">All designers</option></select>
+          <label class="sr" for="f-sil">Silhouette</label>
+          <select id="f-sil"><option value="">Any silhouette</option></select>
+          <label class="sr" for="f-budget">Budget</label>
+          <select id="f-budget">
+            <option value="">Any budget</option>
+            <option value="500">Under $500</option>
+            <option value="2000">Under $2,000</option>
+            <option value="4000">Under $4,000</option>
+          </select>
+          <label class="sr" for="f-sort">Sort</label>
+          <select id="f-sort">
+            <option value="rec">Recommended</option>
+            <option value="lo">Price: low to high</option>
+            <option value="hi">Price: high to low</option>
+            <option value="lead">Shortest lead time</option>
+          </select>
+          <label class="toggle"><input type="checkbox" id="f-intime"> Arrives in time only</label>
+          <span class="result-count" id="result-count"></span>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section id="designers" class="designers">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Who makes it</p><h2>The ateliers</h2></div>
+        <p class="lede">Each studio cuts and finishes its own pieces. We handle fulfilment, sizing support and one returns policy across all of them.</p>
+      </div>
+      <div class="dgrid" id="dgrid"></div>
+    </div>
+  </section>
+
+  <section id="brides">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Sample stories</p><h2>Real brides, real fit</h2></div>
+        <p class="lede">Filter by venue and height to see how a piece wore on someone built like you, and how far ahead she ordered.</p>
+      </div>
+      <div class="filterrow">
+        <div class="chips" id="venue-chips" role="group" aria-label="Venue"></div>
+        <div class="chips" id="height-chips" role="group" aria-label="Height"></div>
+      </div>
+      <div class="bgrid" id="bgrid"></div>
+    </div>
+  </section>
+
+  <section id="fit" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><p class="eyebrow">Fit &amp; sizing</p><h2>Measure once, alter less</h2></div>
+        <p class="lede">Measure over the underwear you plan to wear on the day. Use a soft tape and keep it level. Every piece has a 1.5″ seam allowance at the side seams.</p>
+      </div>
+      <div class="fit-grid">
+        <dl class="measures">
+          <div><dt>Bust</dt><dd>Around the fullest part of the chest, tape level across the back.</dd></div>
+          <div><dt>Underbust</dt><dd>Directly under the bust, snug but not tight. Needed for lehenga blouses and corsetry.</dd></div>
+          <div><dt>Waist</dt><dd>At the natural waist, the narrowest point. Bend to the side and find the crease.</dd></div>
+          <div><dt>High hip</dt><dd>About 4″ below the waist, across the top of the hip bones.</dd></div>
+          <div><dt>Low hip</dt><dd>Around the fullest part of the seat, feet together.</dd></div>
+          <div><dt>Hollow to hem</dt><dd>From the dip between the collarbones to the floor, measured barefoot.</dd></div>
+          <div><dt>Heel height</dt><dd>The height of your wedding shoes. Added to hollow-to-hem when the hem is cut.</dd></div>
+          <div><dt>Between sizes?</dt><dd>Order to your largest measurement. Taking a gown in is easy; letting it out is often impossible.</dd></div>
+        </dl>
+        <div class="finder" aria-labelledby="finder-h">
+          <h3 id="finder-h">Size finder</h3>
+          <div class="fields">
+            <div class="field"><label for="sf-b">Bust (in)</label><input id="sf-b" type="number" inputmode="decimal" step="0.5" value="36"></div>
+            <div class="field"><label for="sf-w">Waist (in)</label><input id="sf-w" type="number" inputmode="decimal" step="0.5" value="29"></div>
+            <div class="field"><label for="sf-h">Low hip (in)</label><input id="sf-h" type="number" inputmode="decimal" step="0.5" value="39.5"></div>
+          </div>
+          <div class="finder-out" id="sf-out" aria-live="polite"></div>
+          <div class="chart-wrap"><table class="chart" id="sf-chart"></table></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="book" class="book">
+    <div class="wrap">
+      <div class="book-grid">
+        <div>
+          <p class="eyebrow">Free, no obligation</p>
+          <h2>Talk it through with a stylist</h2>
+          <p class="lede" style="margin-top:16px">Most brides visit many times before they decide. A short call saves a few of those visits.</p>
+          <ul class="perks">
+            <li>30-minute video call, or an hour in a partner studio</li>
+            <li>A shortlist across designers, sent after the call</li>
+            <li>Swatch box suggestions and a fitting plan for your date</li>
+          </ul>
+        </div>
+        <form class="bform" id="bform" novalidate>
+          <fieldset>
+            <legend>How would you like to meet?</legend>
+            <div class="chips" id="b-type"></div>
+          </fieldset>
+          <div class="two">
+            <div class="field"><label for="b-date">Date</label><input type="date" id="b-date" required></div>
+            <div class="field"><label for="b-venue">Wedding venue</label>
+              <select id="b-venue"><option>Church or chapel</option><option>Ballroom or hotel</option><option>Palace or heritage venue</option><option>Beach</option><option>Garden or vineyard</option><option>City hall</option><option>Still deciding</option></select></div>
+          </div>
+          <fieldset>
+            <legend>Time</legend>
+            <div class="chips" id="b-slots"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Silhouettes you're drawn to</legend>
+            <div class="chips" id="b-sil"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Budget for the main look</legend>
+            <div class="chips" id="b-budget"></div>
+          </fieldset>
+          <div class="two">
+            <div class="field"><label for="b-name">Your name</label><input id="b-name" type="text" autocomplete="name" style="font-family:var(--body)"></div>
+            <div class="field"><label for="b-email">Email</label><input id="b-email" type="email" autocomplete="email" style="font-family:var(--body)"></div>
+          </div>
+          <p class="err" id="b-err" hidden></p>
+          <button class="btn primary" type="submit">Request appointment</button>
+          <div id="b-confirm" hidden></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap fgrid">
+    <div><p class="logo" style="margin-bottom:8px">Trousseau <b>Row</b></p><p>A prototype marketplace for independent bridal ateliers.</p></div>
+    <div><h4>Deposits</h4><p>50% at order for made-to-order pieces. The balance is due before dispatch.</p></div>
+    <div><h4>Cancellations</h4><p>Full refund within 72 hours of ordering. Once fabric is cut, the deposit is non-refundable.</p></div>
+    <div><h4>Returns</h4><p>Standard-size bridesmaid and reception pieces can be returned unworn within 14 days. Made-to-measure pieces are final sale.</p></div>
+    <div><h4>Swatches</h4><p>$15 for a box of up to 5 swatches, credited against your order.</p></div>
+  </div>
+</footer>
+
+<dialog id="pd" aria-labelledby="pd-title"></dialog>
+
+<dialog id="board" class="drawer" aria-labelledby="board-h">
+  <button class="dclose" type="button" data-close aria-label="Close">×</button>
+  <div class="dr-head"><p class="eyebrow">Shortlist</p><h2 id="board-h">Wedding board</h2></div>
+  <div class="dr-body" id="board-body"></div>
+  <div class="dr-foot">
+    <button class="btn" type="button" id="copy-board">Copy board to share with family</button>
+    <textarea id="copy-fallback" class="field" rows="5" hidden aria-label="Board text to copy" style="width:100%;font-family:var(--mono);font-size:.8rem;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg)"></textarea>
+  </div>
+</dialog>
+
+<dialog id="bag" class="drawer" aria-labelledby="bag-h">
+  <button class="dclose" type="button" data-close aria-label="Close">×</button>
+  <div class="dr-head"><p class="eyebrow">Your order</p><h2 id="bag-h">Bag</h2></div>
+  <div class="dr-body" id="bag-body"></div>
+  <div class="dr-foot" id="bag-foot"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+const COLORS = {
+  ivory:['Ivory','#F3ECDF'], champagne:['Champagne','#E6D2B0'], blush:['Blush','#E8C3C0'],
+  red:['Sindoor red','#A32432'], marigold:['Marigold','#D8922A'], emerald:['Emerald','#1E5C4A'],
+  sage:['Sage','#A7B69C'], dusk:['Dusk blue','#9AAEC4'], gold:['Antique gold','#C6A15A'], black:['Black','#2A2629']
+};
+const DESIGNERS = {
+  ondine:{name:'Maison Ondine', city:'Paris', spec:'Structured silk gowns and hand beading'},
+  lumbre:{name:'Casa Lumbre', city:'Seville', spec:'Chantilly lace and Spanish capes'},
+  haldane:{name:'Haldane & Rowe', city:'London', spec:'Minimal crepe tailoring for city weddings'},
+  sora:{name:'Sora Atelier', city:'Kyoto', spec:'Sculptural silk gazar and slip dresses'},
+  rasika:{name:'Rasika Mehra Studio', city:'New Delhi', spec:'Zardozi and gota patti lehengas'},
+  kesar:{name:'Kesar House', city:'Varanasi', spec:'Handwoven Banarasi silk and velvet'},
+  juniper:{name:'Juniper Lane', city:'Portland', spec:'Mix-and-match bridesmaid colour stories'}
+};
+const SIL = {ballgown:'Ball gown', aline:'A-line', mermaid:'Mermaid', sheath:'Sheath', lehenga:'Lehenga', jumpsuit:'Jumpsuit', sari:'Sari'};
+const CATS = ['Wedding gowns','Lehengas','Reception','Pre-wedding events','Bridesmaids'];
+const P = [
+  {id:'celeste', name:'Céleste', d:'ondine', cat:'Wedding gowns', sil:'ballgown', fabric:'Silk mikado, hand-set pearls', colors:['ivory','champagne'], trim:'#C6A15A', price:4850, lead:20, rush:false, work:true, desc:'A full mikado skirt over a boned bodice, with pearls set by hand along the neckline and waist seam.'},
+  {id:'marguerite', name:'Marguerite', d:'lumbre', cat:'Wedding gowns', sil:'mermaid', fabric:'Chantilly lace over silk crepe', colors:['ivory','blush'], trim:'#FFFFFF', price:3600, lead:18, rush:true, work:true, desc:'Fitted through the knee and flaring into a scalloped lace hem. The lace is cut so the motifs meet at the seams.'},
+  {id:'wren', name:'Wren', d:'haldane', cat:'Wedding gowns', sil:'sheath', fabric:'Double-faced crepe', colors:['ivory','champagne'], trim:'#DCCFB8', price:2200, lead:12, rush:true, work:false, desc:'A clean column with a low back. No boning and no beading, so it is light enough for a long day.'},
+  {id:'aiko', name:'Aiko', d:'sora', cat:'Wedding gowns', sil:'aline', fabric:'Silk gazar', colors:['ivory'], trim:'#E9E2D6', price:3100, lead:16, rush:false, work:false, desc:'Folded gazar that holds its shape without a petticoat. Pockets sit in the side seams.'},
+  {id:'odette', name:'Odette', d:'ondine', cat:'Wedding gowns', sil:'aline', fabric:'Tulle with 3D silk florals', colors:['ivory','blush'], trim:'#E3A9AE', price:3950, lead:22, rush:false, work:true, desc:'Layered tulle scattered with silk petals that thin out toward the hem.'},
+  {id:'noor', name:'Noor', d:'rasika', cat:'Lehengas', sil:'lehenga', fabric:'Raw silk with zardozi', colors:['red','blush'], trim:'#C6A15A', price:6400, lead:24, rush:false, work:true, desc:'A twelve-kali skirt with a zardozi border, a matching blouse and a net dupatta finished in gota.'},
+  {id:'rani', name:'Rani', d:'kesar', cat:'Lehengas', sil:'lehenga', fabric:'Silk velvet with dabka', colors:['emerald','red'], trim:'#C6A15A', price:4200, lead:20, rush:false, work:true, desc:'Velvet for a winter wedding, embroidered in dabka and finished with a Banarasi dupatta.'},
+  {id:'gulnaar', name:'Gulnaar', d:'rasika', cat:'Pre-wedding events', sil:'lehenga', fabric:'Organza with gota patti', colors:['marigold','blush'], trim:'#E8C26A', price:2900, lead:14, rush:true, work:true, desc:'Light enough to dance in. Made for mehndi and sangeet, with a flared skirt and a short dupatta.'},
+  {id:'saffron', name:'Saffron', d:'kesar', cat:'Pre-wedding events', sil:'sari', fabric:'Handwoven Banarasi silk', colors:['marigold','red'], trim:'#C6A15A', price:1200, lead:10, rush:true, work:true, desc:'Woven in Varanasi with a zari border. Comes with an unstitched blouse piece, which we can tailor to your measurements.'},
+  {id:'tamsin', name:'Tamsin', d:'haldane', cat:'Pre-wedding events', sil:'sheath', fabric:'Wool-silk crepe', colors:['dusk','ivory'], trim:'#B9C6D6', price:680, lead:6, rush:false, work:false, desc:'A midi sheath for the rehearsal dinner or the registry office.'},
+  {id:'pilar', name:'Pilar', d:'lumbre', cat:'Reception', sil:'jumpsuit', fabric:'Silk crepe, lace cape', colors:['ivory','black'], trim:'#F3ECDF', price:1850, lead:10, rush:true, work:false, desc:'Wide-leg jumpsuit with a detachable floor-length lace cape for the entrance.'},
+  {id:'isadora', name:'Isadora', d:'ondine', cat:'Reception', sil:'sheath', fabric:'Beaded tulle', colors:['champagne','gold'], trim:'#FFFFFF', price:2750, lead:14, rush:false, work:true, desc:'A column covered in glass bugle beads, cut to move under reception lights.'},
+  {id:'hana', name:'Hana', d:'sora', cat:'Reception', sil:'aline', fabric:'Silk charmeuse', colors:['champagne','ivory'], trim:'#E6D2B0', price:1450, lead:8, rush:true, work:false, desc:'A bias-cut slip dress for the after-party. The cowl back is weighted so it stays in place.'},
+  {id:'fern', name:'Fern', d:'juniper', cat:'Bridesmaids', sil:'aline', fabric:'Recycled chiffon', colors:['sage','dusk','blush'], trim:'#FFFFFF', price:240, lead:8, rush:true, work:false, desc:'A wrap-front chiffon A-line in 14 sizes. It mixes with Clover for a coordinated party.'},
+  {id:'clover', name:'Clover', d:'juniper', cat:'Bridesmaids', sil:'sheath', fabric:'Stretch satin', colors:['sage','emerald','champagne'], trim:'#FFFFFF', price:210, lead:8, rush:true, work:false, desc:'Square neck and adjustable straps. The stretch makes it forgiving to buy online.'},
+  {id:'mira', name:'Mira', d:'juniper', cat:'Bridesmaids', sil:'lehenga', fabric:'Georgette with mirror work', colors:['blush','sage','marigold'], trim:'#E8E2D0', price:480, lead:10, rush:true, work:true, desc:'A lightweight lehenga set for bridesmaids, with a crop blouse and a georgette dupatta.'}
+];
+const REVIEWS = {
+  celeste:[{n:'Hélène M.', m:'5\'7″ · ordered size 8 · 9 months out', fit:'Waist taken in 1″', t:'Heavier than I expected, in a good way. My seamstress said the inner corset made the alterations easy.'}],
+  marguerite:[{n:'Lucía R.', m:'5\'3″ · made to measure · 7 months out', fit:'No alterations needed', t:'Hem was exact with my 3″ heels. Delivered two weeks before the date they gave me.'}],
+  noor:[{n:'Ananya K.', m:'5\'2″ · made to measure · 8 months out', fit:'Blouse adjusted once', t:'The zardozi is dense but the skirt still felt manageable through a long ceremony.'}],
+  wren:[{n:'Grace T.', m:'5\'10″ · ordered size 12 · 5 months out', fit:'Hemmed 1″', t:'The crepe does not wrinkle. I sat through a two-hour dinner and it looked the same after.'}],
+  fern:[{n:'Maya P.', m:'Party of 6 · sizes 4 to 18', fit:'True to size', t:'We ordered the sage and the dusk blue together. Both colours matched the swatches exactly.'}]
+};
+const BRIDES = [
+  {who:'Ananya & Rohan', place:'Udaipur', venue:'Palace', height:'Petite', pid:'noor', ordered:'8 months out', fit:'5\'2″ · made to measure', q:'I wanted red and I wanted it heavy. It photographed better than any lehenga I tried in a shop.'},
+  {who:'Lucía & Tom', place:'Seville', venue:'Church', height:'Petite', pid:'marguerite', ordered:'7 months out', fit:'5\'3″ · made to measure', q:'The lace hem came out exactly where the order form said it would.'},
+  {who:'Grace & Femi', place:'London', venue:'City hall', height:'Tall', pid:'wren', ordered:'5 months out', fit:'5\'10″ · size 12', q:'Simple, and very comfortable. I wore it to the pub after the ceremony.'},
+  {who:'Hélène & Marc', place:'Bordeaux', venue:'Garden', height:'Tall', pid:'celeste', ordered:'9 months out', fit:'5\'7″ · size 8', q:'The skirt was enormous and I loved every inch of it.'},
+  {who:'Keiko & Dan', place:'Big Sur', venue:'Beach', height:'Average', pid:'aiko', ordered:'6 months out', fit:'5\'5″ · size 6', q:'The gazar held its shape in the wind, which I did not expect from silk.'},
+  {who:'Sana & Imran', place:'Lahore', venue:'Ballroom', height:'Average', pid:'rani', ordered:'7 months out', fit:'5\'5″ · made to measure', q:'Velvet in December was the right call. My mother cried at the first fitting.'},
+  {who:'Priya & Josh', place:'Napa', venue:'Garden', height:'Average', pid:'gulnaar', ordered:'4 months out', fit:'5\'6″ · size 10', q:'I danced for the whole sangeet and nothing slipped.'},
+  {who:'Nadia & Leo', place:'Chicago', venue:'Ballroom', height:'Tall', pid:'isadora', ordered:'4 months out', fit:'5\'9″ · size 4', q:'It caught every light in the room. I changed into it for the first dance.'}
+];
+const OPT = {
+  gown:[['Neckline',[['As designed',0],['Square',120],['Illusion high neck',280]]],['Sleeves',[['None',0],['Cap',150],['Detachable long',380]]],['Train',[['Sweep',0],['Chapel',220],['Cathedral',540]]]],
+  lehenga:[['Blouse',[['Sleeveless',0],['Elbow sleeve',90],['Full sleeve',160]]],['Dupatta',[['Single',0],['Double (head + shoulder)',420]]],['Skirt volume',[['Standard can-can',0],['Extra volume',140]]]],
+  sari:[['Blouse',[['Unstitched piece',0],['Tailored, sleeveless',120],['Tailored, elbow sleeve',160]]]],
+  other:[['Length',[['As shown',0],['Custom hem length',60]]],['Support',[['Standard lining',0],['Built-in cups',45]]]]
+};
+const SIZES = [0,2,4,6,8,10,12,14,16,18,20,22,24];
+const CHART = {
+  Bust:[32,33,34,35,36,37.5,39,40.5,42,44,46,48,50],
+  Waist:[24.5,25.5,26.5,27.5,28.5,30,31.5,33,34.5,36.5,38.5,40.5,42.5],
+  'Low hip':[35,36,37,38,39,40.5,42,43.5,45,47,49,51,53]
+};
+const MTM_FIELDS = ['Bust','Underbust','Waist','High hip','Low hip','Hollow to hem','Heel height'];
+const RUSH_FEE = 350, ALTER_WEEKS = 4;
+const $ = s => document.querySelector(s);
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmt = (d, o) => d.toLocaleDateString('en-US', o || {month:'short', day:'numeric', year:'numeric'});
+const byId = id => P.find(p => p.id === id);
+const optsFor = p => p.cat === 'Wedding gowns' ? OPT.gown : p.sil === 'lehenga' ? OPT.lehenga : p.sil === 'sari' ? OPT.sari : OPT.other;
+const mtmFee = p => p.price >= 1000 ? 180 : 40;
+
+/* state */
+const KEY = 'trousseau-row-v1';
+const S = {wedding:'2027-05-15', cat:'All', designer:'', sil:'', budget:'', sort:'rec', inTime:false, venue:'All', height:'All', board:[], bag:[]};
+try { Object.assign(S, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch(e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({wedding:S.wedding, board:S.board, bag:S.bag})); } catch(e) {} };
+
+const today = new Date(); today.setHours(0,0,0,0);
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const wDate = () => S.wedding ? new Date(S.wedding + 'T00:00:00') : null;
+function timing(p, rush){
+  const w = wDate(); if (!w) return null;
+  const weeks = p.lead + ALTER_WEEKS - (rush ? 4 : 0);
+  const by = addDays(w, -weeks * 7);
+  const days = Math.round((by - today) / 864e5);
+  return {by, days, weeks, status: days >= 21 ? 'ok' : days >= 0 ? 'soon' : 'late'};
+}
+function pill(p){
+  const t = timing(p, false);
+  if (!t) return {cls:'none', txt:`${p.lead} wk lead`};
+  if (t.status === 'ok') return {cls:'ok', txt:`Order by ${fmt(t.by,{month:'short',day:'numeric'})}`};
+  if (t.status === 'soon') return {cls:'soon', txt: t.days === 0 ? 'Order today' : `Order within ${t.days} days`};
+  if (p.rush && timing(p, true).status !== 'late') return {cls:'soon', txt:'Possible with rush'};
+  return {cls:'late', txt:'Too late for your date'};
+}
+const arrives = p => pill(p).cls !== 'late';
+
+/* illustration: a fashion croquis built from a few shapes */
+let uid = 0;
+function croquis(sil, fill, trim, work){
+  const id = 'pt' + (uid++);
+  const skirts = {
+    ballgown:'M88,108 C70,150 34,220 24,288 Q100,299 176,288 C166,220 130,150 112,108 Z',
+    lehenga:'M88,108 C72,150 42,220 32,286 Q100,297 168,286 C158,220 128,150 112,108 Z',
+    aline:'M88,108 C78,170 58,240 50,288 Q100,296 150,288 C142,240 122,170 112,108 Z',
+    mermaid:'M88,108 C84,160 90,200 88,226 C76,250 56,276 44,292 Q100,300 156,292 C144,276 124,250 112,226 C110,200 116,160 112,108 Z',
+    sheath:'M88,108 C85,170 90,240 84,290 Q100,294 116,290 C110,240 115,170 112,108 Z',
+    sari:'M88,108 C84,170 86,240 80,290 Q100,295 120,290 C114,240 116,170 112,108 Z',
+    jumpsuit:'M88,108 C84,180 84,240 78,290 L98,290 L100,150 L102,290 L122,290 C116,240 116,180 112,108 Z'
+  };
+  const sk = skirts[sil];
+  const pleats = ['ballgown','aline','lehenga'].includes(sil)
+    ? `<path d="M96,112 C88,170 76,230 70,290 M104,112 C112,170 124,230 130,290 M100,112 L100,292" fill="none" stroke="currentColor" stroke-width=".6" opacity=".35"/>` : '';
+  let extra = '';
+  if (sil === 'lehenga') extra = `<path d="M34,274 Q100,286 166,274 L168,286 Q100,297 32,286 Z" fill="${trim}" opacity=".9"/><path d="M116,58 C142,92 152,160 142,232 C137,242 129,238 131,228 C139,160 128,102 106,70 Z" fill="${trim}" opacity=".45"/>`;
+  if (sil === 'sari') extra = `<path d="M84,58 L116,92 L112,108 L88,74 Z" fill="${trim}" opacity=".85"/><path d="M84,56 C68,92 62,160 68,224 L77,222 C75,160 81,100 90,64 Z" fill="${fill}" stroke="currentColor" stroke-width=".8"/><path d="M80,286 Q100,291 120,286 L120,290 Q100,295 80,290 Z" fill="${trim}"/>`;
+  if (sil === 'jumpsuit') extra = `<path d="M84,56 C60,120 54,200 58,284 L68,284 C66,200 76,120 92,62 Z M116,56 C140,120 146,200 142,284 L132,284 C134,200 124,120 108,62 Z" fill="${trim}" opacity=".35" stroke="currentColor" stroke-width=".5"/>`;
+  return `<svg viewBox="0 0 200 300" aria-hidden="true" focusable="false">
+    <defs><pattern id="${id}" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="3.5" cy="3.5" r=".9" fill="${trim}"/></pattern></defs>
+    <g fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7">
+      <ellipse cx="100" cy="30" rx="9" ry="11"/><circle cx="106" cy="20" r="5"/>
+      <path d="M100,41 L100,54"/><path d="M84,58 C78,80 74,105 76,128 C77,140 79,148 80,152"/><path d="M116,58 C122,80 126,105 124,128 C123,140 121,148 120,152"/>
+    </g>
+    <path d="${sk}" fill="${fill}" stroke="currentColor" stroke-width=".9"/>
+    ${work ? `<path d="${sk}" fill="url(#${id})" opacity=".55"/>` : ''}
+    ${pleats}
+    <path d="M84,56 C90,60 110,60 116,56 L112,108 C104,111 96,111 88,108 Z" fill="${fill}" stroke="currentColor" stroke-width=".9"/>
+    ${work ? `<path d="M88,104 C96,108 104,108 112,104 L112,108 C104,111 96,111 88,108 Z" fill="${trim}"/>` : ''}
+    ${extra}
+  </svg>`;
+}
+const art = (p, ci = 0) => croquis(p.sil, COLORS[p.colors[ci]][1], p.trim, p.work);
+const heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
+
+/* hero */
+function renderHero(){
+  $('#wd').value = S.wedding || '';
+  const n = P.filter(arrives).length;
+  const w = wDate();
+  $('#verdict').innerHTML = w
+    ? (w <= today ? 'Pick a date in the future to see what can still be made in time.'
+       : `<strong>${n} of ${P.length}</strong> pieces can still be made, shipped and fitted before ${fmt(w,{month:'long',day:'numeric',year:'numeric'})}.`)
+    : 'Add your date to see the last day to order each piece.';
+  const steps = w ? [
+    ['Choose fabrics', addDays(w, -26*7), 'Order swatches and narrow your shortlist'],
+    ['Order the main look', addDays(w, -24*7), 'Typical 20-week lead plus fitting time'],
+    ['Order bridesmaids', addDays(w, -14*7), 'Allows for one exchange'],
+    ['First fitting', addDays(w, -6*7), 'Bring your shoes and underwear'],
+    ['Final fitting', addDays(w, -2*7), 'Pressing and bustle lesson']
+  ] : [];
+  $('#plan').innerHTML = steps.map((s, i) =>
+    `<li class="${s[1] < today ? 'past' : ''}"><span class="n">STEP ${i+1}</span><span class="d">${fmt(s[1],{month:'short',day:'numeric'})}</span><span class="t"><b>${s[0]}.</b> ${s[1] < today ? 'This date has passed. A stylist can help you plan with rush options.' : s[2]}</span></li>`
+  ).join('') || '<li class="t">Add your wedding date above to build the timeline.</li>';
+  $('#arches').innerHTML = ['celeste','noor','pilar'].map(id => `<div class="arch">${art(byId(id))}</div>`).join('');
+}
+
+/* shop */
+function renderFilters(){
+  $('#cat-chips').innerHTML = ['All', ...CATS].map(c => `<button class="chip" type="button" data-cat="${c}" aria-pressed="${S.cat === c}">${c}</button>`).join('');
+}
+function filtered(){
+  let list = P.filter(p =>
+    (S.cat === 'All' || p.cat === S.cat) &&
+    (!S.designer || p.d === S.designer) &&
+    (!S.sil || p.sil === S.sil) &&
+    (!S.budget || p.price < +S.budget) &&
+    (!S.inTime || arrives(p)));
+  if (S.sort === 'lo') list.sort((a,b) => a.price - b.price);
+  if (S.sort === 'hi') list.sort((a,b) => b.price - a.price);
+  if (S.sort === 'lead') list.sort((a,b) => a.lead - b.lead);
+  return list;
+}
+function renderGrid(){
+  const list = filtered();
+  $('#result-count').textContent = `${list.length} piece${list.length === 1 ? '' : 's'}`;
+  $('#grid').innerHTML = list.map(p => {
+    const t = pill(p); const saved = S.board.includes(p.id);
+    return `<article class="card">
+      <button class="card-hit" type="button" data-open="${p.id}" aria-label="View ${p.name} by ${DESIGNERS[p.d].name}">
+        <div class="card-art">${art(p)}</div>
+        <div>
+          <p class="eyebrow">${DESIGNERS[p.d].name}</p>
+          <h3>${p.name}</h3>
+          <p class="meta">${SIL[p.sil]} · ${p.fabric}</p>
+          <div class="card-foot"><span class="price">from ${money(p.price)}</span><span class="pill ${t.cls}">${t.txt}</span></div>
+        </div>
+      </button>
+      <button class="save" type="button" data-save="${p.id}" aria-pressed="${saved}" aria-label="${saved ? 'Remove from' : 'Save to'} wedding board">${heart}</button>
+    </article>`;
+  }).join('') || `<div class="empty">Nothing matches these filters${S.inTime ? ' and arrives before your date' : ''}. Try another category, or <button class="linkbtn" type="button" id="reset-f">clear all filters</button>.</div>`;
+}
+
+/* designers */
+function renderDesigners(){
+  $('#dgrid').innerHTML = Object.entries(DESIGNERS).map(([k, d]) => {
+    const items = P.filter(p => p.d === k);
+    const from = Math.min(...items.map(p => p.price));
+    return `<div class="dcard"><p class="eyebrow">${d.city}</p><h3>${d.name}</h3><p class="spec">${d.spec}</p>
+      <div class="foot"><span class="mono" style="font-size:.8rem;color:var(--muted)">${items.length} pieces · from ${money(from)}</span>
+      <button class="btn small" type="button" data-designer="${k}">Shop</button></div></div>`;
+  }).join('');
+}
+
+/* brides */
+function renderBrides(){
+  const venues = ['All','Church','Ballroom','Palace','Garden','Beach','City hall'];
+  const heights = [['All','Any height'],['Petite','Under 5\'4″'],['Average','5\'4″–5\'8″'],['Tall','5\'9″ and up']];
+  $('#venue-chips').innerHTML = venues.map(v => `<button class="chip" type="button" data-venue="${v}" aria-pressed="${S.venue === v}">${v === 'All' ? 'Any venue' : v}</button>`).join('');
+  $('#height-chips').innerHTML = heights.map(([v,l]) => `<button class="chip" type="button" data-height="${v}" aria-pressed="${S.height === v}">${l}</button>`).join('');
+  const list = BRIDES.filter(b => (S.venue === 'All' || b.venue === S.venue) && (S.height === 'All' || b.height === S.height));
+  $('#bgrid').innerHTML = list.map(b => {
+    const p = byId(b.pid);
+    return `<article class="bcard"><div class="mini">${art(p)}</div><div style="min-width:0">
+      <blockquote>“${b.q}”</blockquote>
+      <p class="who">${b.who} · ${b.place}</p>
+      <p class="facts"><span>${b.venue}</span><span>${b.fit}</span><span>Ordered ${b.ordered}</span></p>
+      <button class="linkbtn" type="button" data-open="${p.id}" style="margin-top:8px;font-size:.88rem">She wore ${p.name} by ${DESIGNERS[p.d].name}</button>
+    </div></article>`;
+  }).join('') || '<div class="empty" style="grid-column:1/-1">No stories match both filters yet. Try another venue or height.</div>';
+}
+
+/* size finder */
+function findSize(m){
+  let idx = 0, driver = '';
+  for (const [k, vals] of Object.entries(CHART)){
+    const v = m[k]; if (!v) continue;
+    let i = vals.findIndex(x => x >= v);
+    if (i === -1) return {mtm:true};
+    if (!driver || i > idx){ idx = i; driver = k; }
+  }
+  return {idx, size:SIZES[idx], driver};
+}
+function renderFinder(){
+  const m = {Bust:+$('#sf-b').value, Waist:+$('#sf-w').value, 'Low hip':+$('#sf-h').value};
+  const r = findSize(m);
+  const out = $('#sf-out');
+  if (!m.Bust && !m.Waist && !m['Low hip']) out.innerHTML = '<p class="note">Enter at least one measurement.</p>';
+  else if (r.mtm) out.innerHTML = '<p class="big">Made to measure</p><p class="note">One or more measurements is beyond our size 24. Every piece can be cut to your measurements for a small fee.</p>';
+  else {
+    const others = Object.entries(m).filter(([k,v]) => v && k !== r.driver && CHART[k][r.idx] - v >= 1).map(([k]) => k.toLowerCase());
+    out.innerHTML = `<p class="eyebrow">Recommended standard size</p><p class="big">US ${r.size}</p><p class="note">Set by your ${r.driver.toLowerCase()}.${others.length ? ` Expect to take in the ${others.join(' and ')} at your first fitting.` : ' Your measurements sit close to this size across the board.'}</p>`;
+  }
+  $('#sf-chart').innerHTML = `<thead><tr><th scope="col">US size</th>${SIZES.map(s => `<th scope="col">${s}</th>`).join('')}</tr></thead><tbody>${
+    Object.entries(CHART).map(([k, vals]) => `<tr><th scope="row">${k}</th>${vals.map((v,i) => `<td class="${!r.mtm && i === r.idx ? 'hit' : ''}">${v}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+
+/* product dialog */
+let cur = null;
+function openProduct(id){
+  const p = byId(id); if (!p) return;
+  const groups = optsFor(p);
+  cur = {p, ci:0, opts:Object.fromEntries(groups.map(g => [g[0], 0])), mode:'std', size:'8', rush:false};
+  const rv = REVIEWS[p.id] || [];
+  const dlg = $('#pd');
+  dlg.innerHTML = `<button class="dclose" type="button" data-close aria-label="Close">×</button>
+  <div class="pd-grid">
+    <div class="pd-art" id="pd-art">${art(p)}</div>
+    <div class="pd-info">
+      <div>
+        <p class="eyebrow">${DESIGNERS[p.d].name} · ${p.cat}</p>
+        <h2 id="pd-title" style="margin-top:8px">${p.name}</h2>
+        <p class="mono" style="color:var(--muted);font-size:.85rem;margin-top:6px">${SIL[p.sil]} · ${p.fabric}</p>
+        <p style="margin-top:12px;max-width:52ch">${p.desc}</p>
+      </div>
+      <fieldset><legend>Colour</legend><div class="chips">${p.colors.map((c,i) =>
+        `<label class="opt"><input type="radio" name="pd-color" id="pd-color-${i}" value="${i}" ${i === 0 ? 'checked' : ''}><span><i class="dot" style="background:${COLORS[c][1]}"></i>${COLORS[c][0]}</span></label>`).join('')}</div></fieldset>
+      ${groups.map((g, gi) => `<fieldset><legend>${g[0]}</legend><div class="chips">${g[1].map((o, oi) =>
+        `<label class="opt"><input type="radio" name="pd-opt-${gi}" id="pd-opt-${gi}-${oi}" data-group="${g[0]}" value="${oi}" ${oi === 0 ? 'checked' : ''}><span>${o[0]}${o[1] ? `<span class="delta">+${money(o[1])}</span>` : ''}</span></label>`).join('')}</div></fieldset>`).join('')}
+      <fieldset><legend>Size</legend>
+        <div class="chips">
+          <label class="opt"><input type="radio" name="pd-mode" id="pd-mode-std" value="std" checked><span>Standard size</span></label>
+          <label class="opt"><input type="radio" name="pd-mode" id="pd-mode-mtm" value="mtm"><span>Made to measure <span class="delta">+${money(mtmFee(p))}</span></span></label>
+        </div>
+        <div id="pd-std" class="field" style="max-width:220px"><label for="pd-size">US size</label>
+          <select id="pd-size">${SIZES.map(s => `<option ${s === 8 ? 'selected' : ''}>${s}</option>`).join('')}</select>
+        </div>
+        <p class="note" id="pd-std-note">Not sure? <a href="#fit" data-close>Use the size finder</a>.</p>
+        <div id="pd-mtm" hidden>
+          <div class="fields">${MTM_FIELDS.map((f,i) => `<div class="field"><label for="mtm-${i}">${f} (in)</label><input id="mtm-${i}" type="number" inputmode="decimal" step="0.25" min="0"></div>`).join('')}</div>
+          <p class="note" style="margin-top:8px">Our fit team checks every set of measurements and emails you before cutting.</p>
+        </div>
+      </fieldset>
+      ${p.rush ? `<label class="toggle"><input type="checkbox" id="pd-rush"> Rush production, 4 weeks faster (+${money(RUSH_FEE)})</label>` : ''}
+      <div class="tbox" id="pd-time"></div>
+      <div class="breakdown" id="pd-price"></div>
+      <p class="err" id="pd-err" hidden></p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="pd-add">Add to bag</button>
+        <button class="btn" type="button" id="pd-save"></button>
+        <button class="btn" type="button" id="pd-swatch">Add swatch to box</button>
+      </div>
+      ${rv.length ? `<div class="reviews"><p class="eyebrow">Fit notes from brides (sample)</p>${rv.map(r =>
+        `<div class="review"><p><b>${r.n}</b> <span class="fitbadge">· ${r.fit}</span></p><p class="rmeta">${r.m}</p><p>${r.t}</p></div>`).join('')}</div>` : ''}
+    </div>
+  </div>`;
+  updateProduct();
+  if (!dlg.open) dlg.showModal();
+  dlg.scrollTop = 0;
+}
+function configTotal(c){
+  const lines = [['Base price', c.p.price]];
+  optsFor(c.p).forEach(g => { const o = g[1][c.opts[g[0]]]; if (o[1]) lines.push([`${g[0]}: ${o[0]}`, o[1]]); });
+  if (c.mode === 'mtm') lines.push(['Made to measure', mtmFee(c.p)]);
+  if (c.rush) lines.push(['Rush production', RUSH_FEE]);
+  return {lines, total: lines.reduce((s,l) => s + l[1], 0)};
+}
+function updateProduct(){
+  const c = cur; const p = c.p;
+  $('#pd-art').innerHTML = art(p, c.ci);
+  $('#pd-std').hidden = c.mode !== 'std'; $('#pd-std-note').hidden = c.mode !== 'std';
+  $('#pd-mtm').hidden = c.mode !== 'mtm';
+  const t = timing(p, c.rush);
+  const box = $('#pd-time');
+  if (!t) box.innerHTML = `<p><b>${p.lead} weeks</b> to make and ship, plus about ${ALTER_WEEKS} weeks for fittings.</p><p class="note">Add your wedding date at the top of the page for an exact order-by date.</p>`;
+  else {
+    const totalDays = t.weeks * 7, left = Math.max(0, t.days);
+    const pct = Math.max(4, Math.min(100, 100 - (left / (totalDays + left)) * 100));
+    const col = {ok:'var(--ok)', soon:'var(--warn)', late:'var(--bad)'}[t.status];
+    const head = t.status === 'late'
+      ? (p.rush && !c.rush && timing(p,true).status !== 'late' ? 'Too late at standard speed. Rush production makes it.' : 'This piece can’t be ready by your date.')
+      : `Order by ${fmt(t.by,{weekday:'short',month:'short',day:'numeric',year:'numeric'})}`;
+    box.innerHTML = `<div class="head"><b style="color:${col}">${head}</b><span class="mono note">${t.status === 'late' ? `${-t.days} days past` : `${t.days} days left`}</span></div>
+      <div class="tbar" aria-hidden="true"><i style="width:${pct}%;background:${col}"></i></div>
+      <p class="note">${p.lead - (c.rush ? 4 : 0)} weeks to make and ship + ${ALTER_WEEKS} weeks for fittings, before ${fmt(wDate())}.</p>`;
+  }
+  const {lines, total} = configTotal(c);
+  $('#pd-price').innerHTML = lines.map((l,i) => `<div class="ln"><span>${l[0]}</span><span>${i ? '+' : ''}${money(l[1])}</span></div>`).join('') +
+    `<div class="ln tot"><span>Total</span><span>${money(total)}</span></div>
+     <div class="ln dep"><span>Deposit today (50%)</span><span>${money(total/2)}</span></div>`;
+  const saved = S.board.includes(p.id);
+  $('#pd-save').textContent = saved ? 'Saved to board ✓' : 'Save to board';
+  $('#pd-save').setAttribute('aria-pressed', saved);
+}
+
+/* board & bag */
+function toggleBoard(id){
+  const i = S.board.indexOf(id);
+  if (i >= 0) S.board.splice(i,1); else S.board.push(id);
+  save(); renderCounts(); renderGrid(); renderBoard();
+  if (cur && cur.p.id === id && $('#pd').open) updateProduct();
+  toast(i >= 0 ? 'Removed from your board' : 'Saved to your board');
+}
+function addSwatch(p, ci){
+  const sw = S.bag.filter(x => x.type === 'swatch');
+  if (sw.some(x => x.id === p.id && x.ci === ci)) return toast('That swatch is already in your box');
+  S.bag.push({type:'swatch', id:p.id, ci, key:Date.now()+''+Math.random()});
+  save(); renderCounts(); renderBag(); toast(`${COLORS[p.colors[ci]][0]} ${p.name} swatch added`);
+}
+function addToBag(){
+  const c = cur; const err = $('#pd-err');
+  let meas = null;
+  if (c.mode === 'mtm'){
+    meas = MTM_FIELDS.map((f,i) => +$('#mtm-'+i).value);
+    if (meas.some(v => !v || v <= 0)){ err.textContent = 'Add all seven measurements in inches, or choose a standard size.'; err.hidden = false; return; }
+  }
+  if (timing(c.p, c.rush)?.status === 'late'){ err.textContent = 'This piece can’t arrive before your wedding date. Choose rush production if it’s offered, or another piece.'; err.hidden = false; return; }
+  err.hidden = true;
+  const {total} = configTotal(c);
+  S.bag.push({type:'piece', id:c.p.id, ci:c.ci, opts:optsFor(c.p).map(g => `${g[0]}: ${g[1][c.opts[g[0]]][0]}`), size: c.mode === 'mtm' ? 'Made to measure' : 'US ' + c.size, rush:c.rush, total, key:Date.now()+''+Math.random()});
+  save(); renderCounts(); renderBag();
+  $('#pd').close(); toast(`${c.p.name} added to your bag`);
+}
+function renderCounts(){
+  $('#board-count').textContent = S.board.length;
+  $('#bag-count').textContent = S.bag.length;
+}
+function renderBoard(){
+  const b = $('#board-body');
+  b.innerHTML = S.board.length ? S.board.map(id => {
+    const p = byId(id); if (!p) return ''; const t = pill(p);
+    return `<div class="line"><div class="thumb">${art(p)}</div><div style="min-width:0">
+      <p class="eyebrow">${DESIGNERS[p.d].name}</p><h3>${p.name}</h3>
+      <p class="sub">from ${money(p.price)} · <span class="pill ${t.cls}">${t.txt}</span></p>
+      <div class="lact"><button class="linkbtn" type="button" data-open="${p.id}">View &amp; configure</button><button class="linkbtn" type="button" data-save="${p.id}">Remove</button></div>
+    </div><span></span></div>`;
+  }).join('') : '<p class="note">Tap the heart on any piece to save it here. Then copy the board to share it with family, your bridesmaids or your planner.</p>';
+  $('#copy-board').disabled = !S.board.length;
+  $('#copy-fallback').hidden = true;
+}
+function boardText(){
+  const w = wDate();
+  return `My Trousseau Row wedding board${w ? ` (wedding ${fmt(w)})` : ''}\n` +
+    S.board.map(id => { const p = byId(id); return `• ${p.name} by ${DESIGNERS[p.d].name}, ${p.cat}, from ${money(p.price)} (${pill(p).txt})`; }).join('\n');
+}
+function renderBag(){
+  const pieces = S.bag.filter(x => x.type === 'piece');
+  const sw = S.bag.filter(x => x.type === 'swatch');
+  const boxes = Math.ceil(sw.length / 5);
+  const swCost = boxes * 15;
+  const sub = pieces.reduce((s,x) => s + x.total, 0);
+  let html = pieces.map(x => {
+    const p = byId(x.id);
+    return `<div class="line"><div class="thumb">${art(p, x.ci)}</div><div style="min-width:0">
+      <p class="eyebrow">${DESIGNERS[p.d].name}</p><h3>${p.name}</h3>
+      <p class="sub">${COLORS[p.colors[x.ci]][0]} · ${x.size}${x.rush ? ' · Rush' : ''}</p>
+      <p class="sub">${x.opts.join(' · ')}</p>
+      <div class="lact"><button class="linkbtn" type="button" data-remove="${x.key}">Remove</button></div>
+    </div><span class="price">${money(x.total)}</span></div>`;
+  }).join('');
+  if (sw.length) html += `<div class="line"><div class="thumb" style="display:grid;place-items:center;padding:10px;font-family:var(--mono);font-size:.7rem">BOX</div><div style="min-width:0">
+      <p class="eyebrow">Swatch box${boxes > 1 ? 'es' : ''} · ${sw.length} of ${boxes*5}</p><h3>Fabric swatches</h3>
+      <div class="swatchline">${sw.map(s => { const p = byId(s.id); return `<i title="${COLORS[p.colors[s.ci]][0]} ${p.name}" style="background:${COLORS[p.colors[s.ci]][1]}"></i>`; }).join('')}</div>
+      <p class="sub" style="margin-top:6px">${sw.map(s => { const p = byId(s.id); return `${p.name} (${COLORS[p.colors[s.ci]][0]})`; }).join(', ')}</p>
+      <div class="lact"><button class="linkbtn" type="button" data-clear-sw>Empty box</button></div>
+    </div><span class="price">${money(swCost)}</span></div>`;
+  $('#bag-body').innerHTML = html || '<p class="note">Your bag is empty. Start with a swatch box: feel the fabrics before you commit, and get the $15 back when you order.</p>';
+  const dep = sub / 2 + swCost;
+  $('#bag-foot').innerHTML = S.bag.length ? `<div class="breakdown">
+      <div class="ln"><span>Pieces</span><span>${money(sub)}</span></div>
+      ${sw.length ? `<div class="ln"><span>Swatches</span><span>${money(swCost)}</span></div>` : ''}
+      <div class="ln tot"><span>Due today</span><span>${money(dep)}</span></div>
+      <div class="ln dep"><span>Balance before dispatch</span><span>${money(sub/2)}</span></div>
+    </div>
+    <button class="btn primary" type="button" id="checkout">Pay deposit</button>
+    <p class="note" id="checkout-note">Full refund within 72 hours. After fabric is cut, the deposit is non-refundable.</p>` : '';
+}
+
+/* booking */
+const SLOTS = ['10:00','11:30','13:00','14:30','16:00','17:30'];
+function renderBooking(){
+  const types = ['Video call · 30 min','London studio · 60 min','New York studio · 60 min','Mumbai studio · 60 min'];
+  $('#b-type').innerHTML = types.map((t,i) => `<label class="opt"><input type="radio" name="b-type" id="b-type-${i}" value="${t}" ${i === 0 ? 'checked' : ''}><span>${t}</span></label>`).join('');
+  $('#b-sil').innerHTML = Object.values(SIL).map((s,i) => `<label class="opt"><input type="checkbox" name="b-sil" id="b-sil-${i}" value="${s}"><span>${s}</span></label>`).join('');
+  $('#b-budget').innerHTML = ['Under $1,500','$1,500–$3,500','$3,500–$6,000','$6,000+'].map((b,i) => `<label class="opt"><input type="radio" name="b-budget" id="b-budget-${i}" value="${b}" ${i === 1 ? 'checked' : ''}><span>${b}</span></label>`).join('');
+  const min = addDays(today, 1);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  $('#b-date').min = iso(min);
+  if (!$('#b-date').value) $('#b-date').value = iso(addDays(today, 3));
+  renderSlots();
+}
+function renderSlots(){
+  const v = $('#b-date').value; const d = v ? new Date(v + 'T00:00:00') : null;
+  const sunday = d && d.getDay() === 0;
+  const seed = d ? d.getDate() : 0;
+  $('#b-slots').innerHTML = sunday ? '<p class="note">Stylists don’t work on Sundays. Pick another day.</p>' :
+    SLOTS.map((s,i) => { const taken = (seed + i) % 4 === 0; return `<label class="opt"><input type="radio" name="b-slot" id="b-slot-${i}" value="${s}" ${taken ? 'disabled' : ''}><span>${s}</span></label>`; }).join('');
+}
+function submitBooking(e){
+  e.preventDefault();
+  const err = $('#b-err');
+  const slot = document.querySelector('input[name="b-slot"]:checked');
+  const name = $('#b-name').value.trim(), email = $('#b-email').value.trim();
+  const problems = [];
+  if (!$('#b-date').value) problems.push('pick a date');
+  if (!slot) problems.push('choose a time');
+  if (!name) problems.push('add your name');
+  if (!/^\S+@\S+\.\S+$/.test(email)) problems.push('add a valid email so the stylist can send your shortlist');
+  if (problems.length){ err.textContent = 'To request a slot, ' + problems.join(', ') + '.'; err.hidden = false; return; }
+  err.hidden = true;
+  const type = document.querySelector('input[name="b-type"]:checked').value;
+  const sils = [...document.querySelectorAll('input[name="b-sil"]:checked')].map(x => x.value);
+  const budget = document.querySelector('input[name="b-budget"]:checked').value;
+  const c = $('#b-confirm'); c.hidden = false; c.className = 'confirm'; c.innerHTML = '';
+  const h = document.createElement('h3'); h.textContent = `Requested, ${name.split(' ')[0]}.`;
+  const p1 = document.createElement('p'); p1.textContent = `${type}, ${fmt(new Date($('#b-date').value + 'T00:00:00'),{weekday:'long',month:'long',day:'numeric'})} at ${slot.value}.`;
+  const p2 = document.createElement('p'); p2.className = 'note'; p2.textContent = `Stylist brief: ${$('#b-venue').value.toLowerCase()}, ${budget}, ${sils.length ? sils.join(', ') : 'open to any silhouette'}${S.board.length ? `, ${S.board.length} saved piece${S.board.length > 1 ? 's' : ''}` : ''}.`;
+  const p3 = document.createElement('p'); p3.className = 'note'; p3.textContent = 'This is a prototype, so no booking was made and no email was sent.';
+  c.append(h, p1, p2, p3);
+}
+
+/* toast */
+let tt;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
+
+/* events */
+$('#wd').addEventListener('change', e => { S.wedding = e.target.value; save(); renderHero(); renderGrid(); renderBoard(); });
+$('#cta-intime').addEventListener('click', () => { S.inTime = true; $('#f-intime').checked = true; renderGrid(); });
+$('#f-designer').addEventListener('change', e => { S.designer = e.target.value; renderGrid(); });
+$('#f-sil').addEventListener('change', e => { S.sil = e.target.value; renderGrid(); });
+$('#f-budget').addEventListener('change', e => { S.budget = e.target.value; renderGrid(); });
+$('#f-sort').addEventListener('change', e => { S.sort = e.target.value; renderGrid(); });
+$('#f-intime').addEventListener('change', e => { S.inTime = e.target.checked; renderGrid(); });
+['#sf-b','#sf-w','#sf-h'].forEach(s => $(s).addEventListener('input', renderFinder));
+$('#b-date').addEventListener('change', renderSlots);
+$('#bform').addEventListener('submit', submitBooking);
+$('#open-board').addEventListener('click', () => { renderBoard(); $('#board').showModal(); });
+$('#open-bag').addEventListener('click', () => { renderBag(); $('#bag').showModal(); });
+$('#copy-board').addEventListener('click', () => {
+  const txt = boardText(); const fb = $('#copy-fallback');
+  const fallback = () => { fb.value = txt; fb.hidden = false; fb.focus(); fb.select(); toast('Select all and copy the text below'); };
+  try { navigator.clipboard.writeText(txt).then(() => toast('Board copied. Paste it into a message.'), fallback); } catch(e) { fallback(); }
+});
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-open],[data-save],[data-cat],[data-designer],[data-venue],[data-height],[data-close],[data-remove],[data-clear-sw],#reset-f,#checkout,#pd-add,#pd-save,#pd-swatch');
+  if (!t) {
+    if (e.target.tagName === 'DIALOG') e.target.close();
+    return;
+  }
+  if (t.dataset.open){ document.querySelectorAll('dialog.drawer[open]').forEach(d => d.close()); openProduct(t.dataset.open); }
+  else if (t.dataset.save){ toggleBoard(t.dataset.save); }
+  else if (t.dataset.cat){ S.cat = t.dataset.cat; renderFilters(); renderGrid(); }
+  else if (t.dataset.designer){ S.designer = t.dataset.designer; S.cat = 'All'; $('#f-designer').value = S.designer; renderFilters(); renderGrid(); $('#shop').scrollIntoView({behavior:'smooth'}); }
+  else if (t.dataset.venue){ S.venue = t.dataset.venue; renderBrides(); }
+  else if (t.dataset.height){ S.height = t.dataset.height; renderBrides(); }
+  else if (t.hasAttribute('data-close')){ t.closest('dialog')?.close(); }
+  else if (t.dataset.remove){ S.bag = S.bag.filter(x => x.key !== t.dataset.remove); save(); renderCounts(); renderBag(); }
+  else if (t.hasAttribute('data-clear-sw')){ S.bag = S.bag.filter(x => x.type !== 'swatch'); save(); renderCounts(); renderBag(); }
+  else if (t.id === 'reset-f'){ Object.assign(S, {cat:'All', designer:'', sil:'', budget:'', inTime:false}); ['#f-designer','#f-sil','#f-budget'].forEach(s => $(s).value = ''); $('#f-intime').checked = false; renderFilters(); renderGrid(); }
+  else if (t.id === 'checkout'){ $('#checkout-note').textContent = 'Checkout isn’t connected in this prototype, so nothing was charged.'; }
+  else if (t.id === 'pd-add'){ addToBag(); }
+  else if (t.id === 'pd-save'){ toggleBoard(cur.p.id); }
+  else if (t.id === 'pd-swatch'){ addSwatch(cur.p, cur.ci); }
+});
+$('#pd').addEventListener('change', e => {
+  const el = e.target; if (!cur) return;
+  if (el.name === 'pd-color') cur.ci = +el.value;
+  else if (el.dataset.group) cur.opts[el.dataset.group] = +el.value;
+  else if (el.name === 'pd-mode') cur.mode = el.value;
+  else if (el.id === 'pd-size') cur.size = el.value;
+  else if (el.id === 'pd-rush') cur.rush = el.checked;
+  else return;
+  $('#pd-err').hidden = true;
+  updateProduct();
+});
+
+/* init */
+const dsel = $('#f-designer'); Object.entries(DESIGNERS).forEach(([k,d]) => dsel.add(new Option(d.name, k)));
+const ssel = $('#f-sil'); Object.entries(SIL).forEach(([k,s]) => ssel.add(new Option(s, k)));
+renderHero(); renderFilters(); renderGrid(); renderDesigners(); renderBrides(); renderFinder(); renderBooking(); renderCounts(); renderBoard(); renderBag();
+})();
+</script>
+</body>
+</html>
