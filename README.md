@@ -13,12 +13,23 @@ A prototype storefront for a multi-designer bridal marketplace. It is a single s
 - **Real brides.** Stories filtered by venue and height.
 - **Stylist booking.** Appointment request with a short style intake.
 
+## Backend (Supabase)
+
+The page talks to Supabase directly over its REST API; there is no server of our own.
+
+- **Catalogue.** `designers` and `products` are read from Supabase. Edit them in the Table Editor and the site updates on the next page load. If Supabase can't be reached, the page falls back to the catalogue built into `index.html`.
+- **Stylist bookings.** Saved to `appointments`. Booked times are hidden from other visitors through the `taken_slots` function, and a unique index stops double-booking.
+- **Order requests.** The bag sends its contents to `order_requests`. No payment is taken.
+
+Set up a new project by running [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor. The anon key in `index.html` is public by design: row-level security only lets visitors read the active catalogue and create requests. They can't read, change or delete anyone's requests.
+
 ## Run locally
 
-Open `index.html` in a browser.
+Serve the folder with any static file server, for example `npx serve .`, and open the printed address.
 
 ## Limitations
 
 - All designers, products, prices, reviews and stories are sample content.
-- Checkout and booking are not connected to any backend; nothing is charged or sent.
+- No payments are taken. Order and booking requests are stored, but nothing emails the customer yet.
+- Reviews and real-bride stories are still built into `index.html`.
 - The board and bag are stored in the visitor's browser (`localStorage`).
