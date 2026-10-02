@@ -258,7 +258,7 @@ dialog.drawer[open]{display:flex}
 </head>
 <body>
 
-<div class="proto">PROTOTYPE · Sample designers, prices and stories. Nothing is charged, booked or sent.</div>
+<div class="proto">PROTOTYPE · Sample designers, prices and stories. No payments are taken.</div>
 
 <header class="top">
   <div class="wrap">
@@ -288,7 +288,7 @@ dialog.drawer[open]{display:flex}
     <div class="wrap">
       <div class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Designer bridal marketplace · 7 ateliers · 16 pieces</p>
+          <p class="eyebrow" id="hero-eyebrow">Designer bridal marketplace</p>
           <h1>Dressed for every day <em>of the wedding.</em></h1>
           <p class="lede">Gowns, lehengas, reception looks and bridesmaid sets from independent ateliers. Every piece is made to order, so the catalogue works backwards from your date.</p>
           <div class="datecard">
@@ -490,12 +490,36 @@ dialog.drawer[open]{display:flex}
 
 <script>
 (() => {
+/* Supabase: the anon key is public by design; row-level security in supabase/schema.sql controls access. */
+const SB_URL = 'https://ndmuuqebzcfhomidwgdw.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kbXV1cWViemNmaG9taWR3Z2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MjU2NTgsImV4cCI6MjEwNjUwMTY1OH0.SBlipd0Xc_p1__aeELQkb0R3j8AW28P-urKyr307FZw';
+const SB_HEADERS = {apikey:SB_KEY, Authorization:'Bearer ' + SB_KEY, 'Content-Type':'application/json'};
+async function sbFail(r){
+  let body = {}; try { body = await r.json(); } catch(e) {}
+  const err = new Error(body.message || r.statusText); err.code = body.code; return err;
+}
+async function sbGet(path){
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {headers:SB_HEADERS});
+  if (!r.ok) throw await sbFail(r);
+  return r.json();
+}
+async function sbInsert(table, row){
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {method:'POST', headers:{...SB_HEADERS, Prefer:'return=minimal'}, body:JSON.stringify(row)});
+  if (!r.ok) throw await sbFail(r);
+}
+async function sbRpc(fn, args){
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {method:'POST', headers:SB_HEADERS, body:JSON.stringify(args)});
+  if (!r.ok) throw await sbFail(r);
+  return r.json();
+}
+
 const COLORS = {
   ivory:['Ivory','#F3ECDF'], champagne:['Champagne','#E6D2B0'], blush:['Blush','#E8C3C0'],
   red:['Sindoor red','#A32432'], marigold:['Marigold','#D8922A'], emerald:['Emerald','#1E5C4A'],
   sage:['Sage','#A7B69C'], dusk:['Dusk blue','#9AAEC4'], gold:['Antique gold','#C6A15A'], black:['Black','#2A2629']
 };
-const DESIGNERS = {
+/* Built-in catalogue: shown until Supabase answers, and kept if it can't be reached. */
+let DESIGNERS = {
   ondine:{name:'Maison Ondine', city:'Paris', spec:'Structured silk gowns and hand beading'},
   lumbre:{name:'Casa Lumbre', city:'Seville', spec:'Chantilly lace and Spanish capes'},
   haldane:{name:'Haldane & Rowe', city:'London', spec:'Minimal crepe tailoring for city weddings'},
@@ -506,7 +530,7 @@ const DESIGNERS = {
 };
 const SIL = {ballgown:'Ball gown', aline:'A-line', mermaid:'Mermaid', sheath:'Sheath', lehenga:'Lehenga', jumpsuit:'Jumpsuit', sari:'Sari'};
 const CATS = ['Wedding gowns','Lehengas','Reception','Pre-wedding events','Bridesmaids'];
-const P = [
+let P = [
   {id:'celeste', name:'Céleste', d:'ondine', cat:'Wedding gowns', sil:'ballgown', fabric:'Silk mikado, hand-set pearls', colors:['ivory','champagne'], trim:'#C6A15A', price:4850, lead:20, rush:false, work:true, desc:'A full mikado skirt over a boned bodice, with pearls set by hand along the neckline and waist seam.'},
   {id:'marguerite', name:'Marguerite', d:'lumbre', cat:'Wedding gowns', sil:'mermaid', fabric:'Chantilly lace over silk crepe', colors:['ivory','blush'], trim:'#FFFFFF', price:3600, lead:18, rush:true, work:true, desc:'Fitted through the knee and flaring into a scalloped lace hem. The lace is cut so the motifs meet at the seams.'},
   {id:'wren', name:'Wren', d:'haldane', cat:'Wedding gowns', sil:'sheath', fabric:'Double-faced crepe', colors:['ivory','champagne'], trim:'#DCCFB8', price:2200, lead:12, rush:true, work:false, desc:'A clean column with a low back. No boning and no beading, so it is light enough for a long day.'},
@@ -628,6 +652,7 @@ const heart = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 /* hero */
 function renderHero(){
   $('#wd').value = S.wedding || '';
+  $('#hero-eyebrow').textContent = `Designer bridal marketplace · ${Object.keys(DESIGNERS).length} ateliers · ${P.length} pieces`;
   const n = P.filter(arrives).length;
   const w = wDate();
   $('#verdict').innerHTML = w
@@ -644,7 +669,9 @@ function renderHero(){
   $('#plan').innerHTML = steps.map((s, i) =>
     `<li class="${s[1] < today ? 'past' : ''}"><span class="n">STEP ${i+1}</span><span class="d">${fmt(s[1],{month:'short',day:'numeric'})}</span><span class="t"><b>${s[0]}.</b> ${s[1] < today ? 'This date has passed. A stylist can help you plan with rush options.' : s[2]}</span></li>`
   ).join('') || '<li class="t">Add your wedding date above to build the timeline.</li>';
-  $('#arches').innerHTML = ['celeste','noor','pilar'].map(id => `<div class="arch">${art(byId(id))}</div>`).join('');
+  const heroIds = ['celeste','noor','pilar'].filter(byId);
+  const heroPieces = heroIds.length === 3 ? heroIds.map(byId) : P.slice(0, 3);
+  $('#arches').innerHTML = heroPieces.map(p => `<div class="arch">${art(p)}</div>`).join('');
 }
 
 /* shop */
@@ -700,7 +727,7 @@ function renderBrides(){
   const heights = [['All','Any height'],['Petite','Under 5\'4″'],['Average','5\'4″–5\'8″'],['Tall','5\'9″ and up']];
   $('#venue-chips').innerHTML = venues.map(v => `<button class="chip" type="button" data-venue="${v}" aria-pressed="${S.venue === v}">${v === 'All' ? 'Any venue' : v}</button>`).join('');
   $('#height-chips').innerHTML = heights.map(([v,l]) => `<button class="chip" type="button" data-height="${v}" aria-pressed="${S.height === v}">${l}</button>`).join('');
-  const list = BRIDES.filter(b => (S.venue === 'All' || b.venue === S.venue) && (S.height === 'All' || b.height === S.height));
+  const list = BRIDES.filter(b => byId(b.pid) && (S.venue === 'All' || b.venue === S.venue) && (S.height === 'All' || b.height === S.height));
   $('#bgrid').innerHTML = list.map(b => {
     const p = byId(b.pid);
     return `<article class="bcard"><div class="mini">${art(p)}</div><div style="min-width:0">
@@ -849,7 +876,7 @@ function addToBag(){
   if (timing(c.p, c.rush)?.status === 'late'){ err.textContent = 'This piece can’t arrive before your wedding date. Choose rush production if it’s offered, or another piece.'; err.hidden = false; return; }
   err.hidden = true;
   const {total} = configTotal(c);
-  S.bag.push({type:'piece', id:c.p.id, ci:c.ci, opts:optsFor(c.p).map(g => `${g[0]}: ${g[1][c.opts[g[0]]][0]}`), size: c.mode === 'mtm' ? 'Made to measure' : 'US ' + c.size, rush:c.rush, total, key:Date.now()+''+Math.random()});
+  S.bag.push({type:'piece', id:c.p.id, ci:c.ci, opts:optsFor(c.p).map(g => `${g[0]}: ${g[1][c.opts[g[0]]][0]}`), size: c.mode === 'mtm' ? 'Made to measure' : 'US ' + c.size, rush:c.rush, meas: meas ? Object.fromEntries(MTM_FIELDS.map((f,i) => [f, meas[i]])) : null, total, key:Date.now()+''+Math.random()});
   save(); renderCounts(); renderBag();
   $('#pd').close(); toast(`${c.p.name} added to your bag`);
 }
@@ -896,16 +923,45 @@ function renderBag(){
       <p class="sub" style="margin-top:6px">${sw.map(s => { const p = byId(s.id); return `${p.name} (${COLORS[p.colors[s.ci]][0]})`; }).join(', ')}</p>
       <div class="lact"><button class="linkbtn" type="button" data-clear-sw>Empty box</button></div>
     </div><span class="price">${money(swCost)}</span></div>`;
-  $('#bag-body').innerHTML = html || '<p class="note">Your bag is empty. Start with a swatch box: feel the fabrics before you commit, and get the $15 back when you order.</p>';
+  $('#bag-body').innerHTML = html || orderSent || '<p class="note">Your bag is empty. Start with a swatch box: feel the fabrics before you commit, and get the $15 back when you order.</p>';
   const dep = sub / 2 + swCost;
+  const keep = {name: $('#o-name')?.value || '', email: $('#o-email')?.value || ''};
   $('#bag-foot').innerHTML = S.bag.length ? `<div class="breakdown">
       <div class="ln"><span>Pieces</span><span>${money(sub)}</span></div>
       ${sw.length ? `<div class="ln"><span>Swatches</span><span>${money(swCost)}</span></div>` : ''}
       <div class="ln tot"><span>Due today</span><span>${money(dep)}</span></div>
       <div class="ln dep"><span>Balance before dispatch</span><span>${money(sub/2)}</span></div>
     </div>
-    <button class="btn primary" type="button" id="checkout">Pay deposit</button>
-    <p class="note" id="checkout-note">Full refund within 72 hours. After fabric is cut, the deposit is non-refundable.</p>` : '';
+    <div class="two">
+      <div class="field"><label for="o-name">Your name</label><input id="o-name" type="text" autocomplete="name" style="font-family:var(--body)"></div>
+      <div class="field"><label for="o-email">Email</label><input id="o-email" type="email" autocomplete="email" style="font-family:var(--body)"></div>
+    </div>
+    <p class="err" id="o-err" hidden></p>
+    <button class="btn primary" type="button" id="checkout">Send order request</button>
+    <p class="note">A stylist checks the details and sends an invoice for the amount due. Full refund within 72 hours of paying; after fabric is cut, the deposit is non-refundable.</p>` : '';
+  if (S.bag.length){ $('#o-name').value = keep.name; $('#o-email').value = keep.email; }
+}
+let orderSent = '';
+const validEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+async function sendOrder(btn){
+  const name = $('#o-name').value.trim(), email = $('#o-email').value.trim(), err = $('#o-err');
+  if (!name || !validEmail(email)){ err.textContent = 'Add your name and a valid email so a stylist can send the invoice.'; err.hidden = false; return; }
+  err.hidden = true;
+  const pieces = S.bag.filter(x => x.type === 'piece'), sw = S.bag.filter(x => x.type === 'swatch');
+  const subtotal = pieces.reduce((s,x) => s + x.total, 0), swCost = Math.ceil(sw.length / 5) * 15;
+  const items = [
+    ...pieces.map(x => { const p = byId(x.id); return {type:'piece', product_id:p.id, name:p.name, designer:DESIGNERS[p.d].name, colour:COLORS[p.colors[x.ci]][0], size:x.size, options:x.opts, rush:x.rush, measurements:x.meas || null, total_usd:x.total}; }),
+    ...sw.map(x => { const p = byId(x.id); return {type:'swatch', product_id:p.id, name:p.name, colour:COLORS[p.colors[x.ci]][0]}; })
+  ];
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await sbInsert('order_requests', {name, email, wedding_date:S.wedding || null, items, subtotal_usd:Math.round(subtotal), due_now_usd:Math.round(subtotal / 2 + swCost)});
+    orderSent = `<div class="confirm"><h3>Order request sent</h3><p>Thank you, ${name.split(' ')[0].replace(/[<>&"]/g, '')}. A stylist will email ${email.replace(/[<>&"]/g, '')} with an invoice for ${money(subtotal / 2 + swCost)}.</p></div>`;
+    S.bag = []; save(); renderCounts(); renderBag();
+  } catch(e) {
+    err.textContent = 'Your order request couldn’t be sent. Check your connection and try again. Your bag has been kept.'; err.hidden = false;
+    btn.disabled = false; btn.textContent = 'Send order request';
+  }
 }
 
 /* booking */
@@ -921,14 +977,21 @@ function renderBooking(){
   if (!$('#b-date').value) $('#b-date').value = iso(addDays(today, 3));
   renderSlots();
 }
-function renderSlots(){
+let slotReq = 0;
+async function renderSlots(){
   const v = $('#b-date').value; const d = v ? new Date(v + 'T00:00:00') : null;
-  const sunday = d && d.getDay() === 0;
-  const seed = d ? d.getDate() : 0;
-  $('#b-slots').innerHTML = sunday ? '<p class="note">Stylists don’t work on Sundays. Pick another day.</p>' :
-    SLOTS.map((s,i) => { const taken = (seed + i) % 4 === 0; return `<label class="opt"><input type="radio" name="b-slot" id="b-slot-${i}" value="${s}" ${taken ? 'disabled' : ''}><span>${s}</span></label>`; }).join('');
+  const type = document.querySelector('input[name="b-type"]:checked')?.value;
+  const box = $('#b-slots'); const req = ++slotReq;
+  if (!d){ box.innerHTML = '<p class="note">Pick a date to see open times.</p>'; return; }
+  if (d.getDay() === 0){ box.innerHTML = '<p class="note">Stylists don’t work on Sundays. Pick another day.</p>'; return; }
+  box.innerHTML = '<p class="note">Checking open times…</p>';
+  let taken = [];
+  try { taken = (await sbRpc('taken_slots', {p_date:v, p_meeting_type:type})).map(x => typeof x === 'string' ? x : Object.values(x)[0]); }
+  catch(e) { console.warn('Could not load booked times:', e.message); }
+  if (req !== slotReq) return;
+  box.innerHTML = SLOTS.map((s,i) => { const t = taken.includes(s); return `<label class="opt"><input type="radio" name="b-slot" id="b-slot-${i}" value="${s}" ${t ? 'disabled' : ''}><span>${s}</span></label>`; }).join('');
 }
-function submitBooking(e){
+async function submitBooking(e){
   e.preventDefault();
   const err = $('#b-err');
   const slot = document.querySelector('input[name="b-slot"]:checked');
@@ -937,18 +1000,36 @@ function submitBooking(e){
   if (!$('#b-date').value) problems.push('pick a date');
   if (!slot) problems.push('choose a time');
   if (!name) problems.push('add your name');
-  if (!/^\S+@\S+\.\S+$/.test(email)) problems.push('add a valid email so the stylist can send your shortlist');
+  if (!validEmail(email)) problems.push('add a valid email so the stylist can send your shortlist');
   if (problems.length){ err.textContent = 'To request a slot, ' + problems.join(', ') + '.'; err.hidden = false; return; }
   err.hidden = true;
   const type = document.querySelector('input[name="b-type"]:checked').value;
   const sils = [...document.querySelectorAll('input[name="b-sil"]:checked')].map(x => x.value);
   const budget = document.querySelector('input[name="b-budget"]:checked').value;
+  const btn = $('#bform button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await sbInsert('appointments', {
+      meeting_type:type, appointment_date:$('#b-date').value, time_slot:slot.value, venue:$('#b-venue').value,
+      budget, silhouettes:sils, saved_pieces:S.board.slice(), wedding_date:S.wedding || null, name, email
+    });
+  } catch(ex) {
+    err.textContent = ex.code === '23505'
+      ? 'Someone has just booked that time. Pick another slot.'
+      : 'Your request couldn’t be sent. Check your connection and try again.';
+    err.hidden = false;
+    if (ex.code === '23505') renderSlots();
+    return;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Request appointment';
+  }
   const c = $('#b-confirm'); c.hidden = false; c.className = 'confirm'; c.innerHTML = '';
   const h = document.createElement('h3'); h.textContent = `Requested, ${name.split(' ')[0]}.`;
   const p1 = document.createElement('p'); p1.textContent = `${type}, ${fmt(new Date($('#b-date').value + 'T00:00:00'),{weekday:'long',month:'long',day:'numeric'})} at ${slot.value}.`;
   const p2 = document.createElement('p'); p2.className = 'note'; p2.textContent = `Stylist brief: ${$('#b-venue').value.toLowerCase()}, ${budget}, ${sils.length ? sils.join(', ') : 'open to any silhouette'}${S.board.length ? `, ${S.board.length} saved piece${S.board.length > 1 ? 's' : ''}` : ''}.`;
-  const p3 = document.createElement('p'); p3.className = 'note'; p3.textContent = 'This is a prototype, so no booking was made and no email was sent.';
+  const p3 = document.createElement('p'); p3.className = 'note'; p3.textContent = `A stylist will email ${email} to confirm.`;
   c.append(h, p1, p2, p3);
+  renderSlots();
 }
 
 /* toast */
@@ -990,7 +1071,7 @@ document.addEventListener('click', e => {
   else if (t.dataset.remove){ S.bag = S.bag.filter(x => x.key !== t.dataset.remove); save(); renderCounts(); renderBag(); }
   else if (t.hasAttribute('data-clear-sw')){ S.bag = S.bag.filter(x => x.type !== 'swatch'); save(); renderCounts(); renderBag(); }
   else if (t.id === 'reset-f'){ Object.assign(S, {cat:'All', designer:'', sil:'', budget:'', inTime:false}); ['#f-designer','#f-sil','#f-budget'].forEach(s => $(s).value = ''); $('#f-intime').checked = false; renderFilters(); renderGrid(); }
-  else if (t.id === 'checkout'){ $('#checkout-note').textContent = 'Checkout isn’t connected in this prototype, so nothing was charged.'; }
+  else if (t.id === 'checkout'){ sendOrder(t); }
   else if (t.id === 'pd-add'){ addToBag(); }
   else if (t.id === 'pd-save'){ toggleBoard(cur.p.id); }
   else if (t.id === 'pd-swatch'){ addSwatch(cur.p, cur.ci); }
@@ -1007,10 +1088,43 @@ $('#pd').addEventListener('change', e => {
   updateProduct();
 });
 
+/* catalogue from Supabase */
+async function loadCatalogue(){
+  try {
+    const [ds, ps] = await Promise.all([
+      sbGet('designers?select=*&order=sort'),
+      sbGet('products?select=*&active=eq.true&order=sort')
+    ]);
+    if (!ds.length || !ps.length) return;
+    DESIGNERS = Object.fromEntries(ds.map(d => [d.id, {name:d.name, city:d.city || '', spec:d.specialty || ''}]));
+    P = ps.filter(p => DESIGNERS[p.designer_id] && SIL[p.silhouette]).map(p => ({
+      id:p.id, name:p.name, d:p.designer_id, cat:p.category, sil:p.silhouette, fabric:p.fabric || '',
+      colors:(p.colors || []).filter(c => COLORS[c]).length ? p.colors.filter(c => COLORS[c]) : ['ivory'],
+      trim:p.trim_color || '#C6A15A', price:p.price_usd, lead:p.lead_weeks, rush:p.rush_available, work:p.embellished, desc:p.description || ''
+    }));
+    S.board = S.board.filter(byId);
+    S.bag = S.bag.filter(x => byId(x.id));
+    save(); renderAll();
+  } catch(e) {
+    console.warn('Using the built-in catalogue:', e.message);
+  }
+}
+function populateSelects(){
+  const dsel = $('#f-designer'); dsel.length = 1;
+  Object.entries(DESIGNERS).forEach(([k,d]) => dsel.add(new Option(d.name, k)));
+  if (!DESIGNERS[S.designer]) S.designer = '';
+  dsel.value = S.designer;
+}
+function renderAll(){
+  populateSelects();
+  renderHero(); renderFilters(); renderGrid(); renderDesigners(); renderBrides(); renderCounts(); renderBoard(); renderBag();
+}
+
 /* init */
-const dsel = $('#f-designer'); Object.entries(DESIGNERS).forEach(([k,d]) => dsel.add(new Option(d.name, k)));
 const ssel = $('#f-sil'); Object.entries(SIL).forEach(([k,s]) => ssel.add(new Option(s, k)));
-renderHero(); renderFilters(); renderGrid(); renderDesigners(); renderBrides(); renderFinder(); renderBooking(); renderCounts(); renderBoard(); renderBag();
+$('#b-type').addEventListener('change', renderSlots);
+renderAll(); renderFinder(); renderBooking();
+loadCatalogue();
 })();
 </script>
 </body>
