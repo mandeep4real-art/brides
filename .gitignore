@@ -1,0 +1,8 @@
+# Local settings and the file generated from them
+.env
+.env.*
+!.env.example
+config.js
+
+# Loose source photos (the site uses the copies in images/)
+/images*.jpg

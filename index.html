@@ -499,11 +499,15 @@ img.photo{display:block;width:100%;height:100%;object-fit:cover;object-position:
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="config.js"></script>
 <script>
 (() => {
-/* Supabase: the anon key is public by design; row-level security in supabase/schema.sql controls access. */
-const SB_URL = 'https://ndmuuqebzcfhomidwgdw.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kbXV1cWViemNmaG9taWR3Z2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MjU2NTgsImV4cCI6MjEwNjUwMTY1OH0.SBlipd0Xc_p1__aeELQkb0R3j8AW28P-urKyr307FZw';
+/* Supabase settings come from config.js (built from .env or Vercel environment variables).
+   The values below are the fallback. The anon key is public by design; row-level security
+   in supabase/schema.sql controls access. */
+const CFG = window.TROUSSEAU_CONFIG || {};
+const SB_URL = CFG.supabaseUrl || 'https://ndmuuqebzcfhomidwgdw.supabase.co';
+const SB_KEY = CFG.supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kbXV1cWViemNmaG9taWR3Z2R3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5MjU2NTgsImV4cCI6MjEwNjUwMTY1OH0.SBlipd0Xc_p1__aeELQkb0R3j8AW28P-urKyr307FZw';
 const SB_HEADERS = {apikey:SB_KEY, Authorization:'Bearer ' + SB_KEY, 'Content-Type':'application/json'};
 async function sbFail(r){
   let body = {}; try { body = await r.json(); } catch(e) {}

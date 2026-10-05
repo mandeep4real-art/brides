@@ -23,6 +23,18 @@ The page talks to Supabase directly over its REST API; there is no server of our
 
 Set up a new project by running [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor. The anon key in `index.html` is public by design: row-level security only lets visitors read the active catalogue and create requests. They can't read, change or delete anyone's requests.
 
+## Configuration
+
+Supabase settings live in `.env`, which is not committed. Copy `.env.example` to `.env`, fill in `SUPABASE_URL` and `SUPABASE_ANON_KEY`, then run:
+
+```
+node scripts/build-config.js
+```
+
+This writes `config.js`, which the page loads. On Vercel, set the same two variables under **Settings → Environment Variables**. The build command in `vercel.json` generates `config.js` on each deploy. If `config.js` is missing, the page falls back to the values built into `index.html`.
+
+The script refuses a `service_role` key, because that key would give every visitor full access to the database.
+
 ## Run locally
 
 Serve the folder with any static file server, for example `npx serve .`, and open the printed address.
